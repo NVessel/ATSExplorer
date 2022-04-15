@@ -10,7 +10,7 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("Untitled.fxml"));
         stage.setTitle("Derivative Toy");
-        stage.setScene(new Scene(root, 500, 500));
+        stage.setScene(new Scene(root, 600, 500));
         stage.show();
     }
 
