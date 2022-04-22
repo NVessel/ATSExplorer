@@ -1,114 +1,43 @@
 import flanagan.integration.RungeKutta;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
-public class EnteringController {
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
+
+public class EnteringController implements Initializable {
+
+        private static final Random RANDOM = new Random();
 
         @FXML
         private Button calculateButton;
 
         @FXML
-        private TextField fFifthLeft;
-
-        @FXML
-        private TextField fFifthRight;
-
-        @FXML
-        private TextField fFifthX0;
-
-        @FXML
-        private TextField fFifthX1;
-
-        @FXML
-        private TextField fFifthX2;
-
-        @FXML
-        private TextField fFifthX3;
-
-        @FXML
-        private TextField fFirstLeft;
-
-        @FXML
-        private TextField fFirstRight;
-
-        @FXML
-        private TextField fFirstX0;
-
-        @FXML
-        private TextField fFirstX1;
-
-        @FXML
-        private TextField fFirstX2;
-
-        @FXML
-        private TextField fFirstX3;
-
-        @FXML
-        private TextField fFourthLeft;
-
-        @FXML
-        private TextField fFourthRight;
-
-        @FXML
-        private TextField fFourthX0;
-
-        @FXML
-        private TextField fFourthX1;
-
-        @FXML
-        private TextField fFourthX2;
-
-        @FXML
-        private TextField fFourthX3;
-
-        @FXML
-        private TextField fSecondLeft;
-
-        @FXML
-        private TextField fSecondRight;
-
-        @FXML
-        private TextField fSecondX0;
-
-        @FXML
-        private TextField fSecondX1;
-
-        @FXML
-        private TextField fSecondX2;
-
-        @FXML
-        private TextField fSecondX3;
-
-        @FXML
-        private TextField fThirdLeft;
-
-        @FXML
-        private TextField fThirdRight;
-
-        @FXML
-        private TextField fThirdX0;
-
-        @FXML
-        private TextField fThirdX1;
-
-        @FXML
-        private TextField fThirdX2;
-
-        @FXML
-        private TextField fThirdX3;
-
-        @FXML
         private AnchorPane left_scroll_anchor_pane;
 
         @FXML
-        void calculateDerivs(ActionEvent event) {
+        private Pane right_pane;
+
+        @FXML
+        void calculateDerivs(ActionEvent event) throws IOException {
                 int[][] cons = PosNegMatrixSupplier.getMatrix();
                 String[][] coefs = CoefMatrixSupplier.getMatrix();
                 double[] y0 = new double[15];
@@ -122,53 +51,67 @@ public class EnteringController {
                                 }
                         }
                 }
-                int i1 = Integer.parseInt(fFirstLeft.getText());
-                int i2 = Integer.parseInt(fFirstRight.getText());
-                i1--; i2--;
-                String join = String.join(",", fFirstX3.getText(),
-                        fFirstX2.getText(), fFirstX1.getText(), fFirstX0.getText());
-                coefs[i1][i2] = join;
-                i1 = Integer.parseInt(fSecondLeft.getText());
-                i2 = Integer.parseInt(fSecondRight.getText());
-                i1--; i2--;
-                join = String.join(",", fSecondX3.getText(),
-                        fSecondX2.getText(), fSecondX1.getText(), fSecondX0.getText());
-                coefs[i1][i2] = join;
-                i1 = Integer.parseInt(fThirdLeft.getText());
-                i2 = Integer.parseInt(fThirdRight.getText());
-                i1--; i2--;
-                join = String.join(",", fThirdX3.getText(),
-                        fThirdX2.getText(), fThirdX1.getText(), fThirdX0.getText());
-                coefs[i1][i2] = join;
-                i1 = Integer.parseInt(fFourthLeft.getText());
-                i2 = Integer.parseInt(fFourthRight.getText());
-                i1--; i2--;
-                join = String.join(",", fFourthX3.getText(),
-                        fFourthX2.getText(), fFourthX1.getText(), fFourthX0.getText());
-                coefs[i1][i2] = join;
-                i1 = Integer.parseInt(fFifthLeft.getText());
-                i2 = Integer.parseInt(fFifthRight.getText());
-                i1--; i2--;
-                join = String.join(",", fFifthX3.getText(),
-                        fFifthX2.getText(), fFifthX1.getText(), fFifthX0.getText());
-                coefs[i1][i2] = join;
-
+                ObservableList<Node> rightPaneChildren = right_pane.getChildren();
+                for (Node node: rightPaneChildren) {
+                        HBox hbox = (HBox) node;
+                        HBox leftHbox = (HBox) hbox.getChildren().get(0);
+                        HBox rightHbox = (HBox) hbox.getChildren().get(1);
+                        ChoiceBox<Integer> choiceLeft = (ChoiceBox<Integer>) leftHbox.getChildren().get(1);
+                        ChoiceBox<Integer> choiceRight = (ChoiceBox<Integer>) leftHbox.getChildren().get(2);
+                        Integer choiceLeftValue = choiceLeft.getValue();
+                        Integer choiceRightValue = choiceRight.getValue();
+                        String joinCoefs = "";
+                        for (Node rightHboxChild : rightHbox.getChildren()) {
+                                if (rightHboxChild instanceof TextField) {
+                                        joinCoefs += ((TextField) rightHboxChild).getText() + ",";
+                                }
+                        }
+                        coefs[--choiceLeftValue][--choiceRightValue] = joinCoefs;
+                }
                 double h = 0.01;                      // step size
                 double x0 = 0.0D;                     // initial value of x
                 double xn = 0.1D;
-                double[ ] yn = new double[15];         //results
+                double[ ] yn = new double[15]; //results
+                double[][] ynParts = new double[15][10];
                 DerivSystem systemDeriv = new DerivSystem();
                 systemDeriv.setCoefs(coefs);
                 systemDeriv.setCons(cons);
                 for (int j = 0; j < 10; j++) {
                         yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
-                        System.out.println("Fourth order Runge-Kutta results");
                         for (int i = 0; i < 15; i++) {
-                                System.out.println(xn + " " + yn[i]);
+                                ynParts[i][j] = yn[i];
                         }
                         y0 = yn;
                         x0 += 0.1;
                         xn += 0.1;
+                }
+                FXMLLoader fxmlLoader= new FXMLLoader(getClass().getResource("Untitled2.fxml"));
+                Parent load = fxmlLoader.load();
+                ResultController resultController = fxmlLoader.getController();
+                resultController.displayResults(ynParts);
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                Scene scene = new Scene(load);
+                stage.setScene(scene);
+                stage.show();
+        }
+
+        @Override
+        public void initialize(URL url, ResourceBundle resourceBundle) {
+                for (Node node: right_pane.getChildren()) {
+                        HBox hbox = (HBox) node;
+                        HBox leftHbox = (HBox) hbox.getChildren().get(0);
+                        ChoiceBox<Integer> choiceLeft = (ChoiceBox<Integer>) leftHbox.getChildren().get(1);
+                        ChoiceBox<Integer> choiceRight = (ChoiceBox<Integer>) leftHbox.getChildren().get(2);
+                        List<Integer> integers = new ArrayList<>();
+                        for (int i = 1; i < 16; i++) {
+                                integers.add(i);
+                        }
+                        choiceLeft.getItems().clear();
+                        choiceLeft.setItems(FXCollections.observableList(integers));
+                        choiceLeft.setValue(RANDOM.nextInt(14) + 1);
+                        choiceRight.getItems().clear();
+                        choiceRight.setItems(FXCollections.observableList(integers));
+                        choiceRight.setValue(RANDOM.nextInt(14) + 1);
                 }
         }
 }

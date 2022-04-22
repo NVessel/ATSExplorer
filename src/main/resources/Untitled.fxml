@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
@@ -11,75 +12,22 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EnteringController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EnteringController">
    <children>
-      <ButtonBar layoutX="353.0" layoutY="336.0" prefHeight="40.0" prefWidth="234.0" style="-fx-background-color: orange;">
+      <ButtonBar layoutX="353.0" layoutY="336.0" prefHeight="40.0" prefWidth="234.0" style="-fx-background-color: orange; -fx-border-color: black;">
         <buttons>
           <Button fx:id="calculateButton" mnemonicParsing="false" onAction="#calculateDerivs" text="Расчёт" />
         </buttons>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets right="75.0" />
+         </padding>
       </ButtonBar>
-      <Pane layoutX="296.0" layoutY="14.0" prefHeight="253.0" prefWidth="290.0" style="-fx-background-color: lightgray;">
-         <children>
-            <Label layoutX="14.0" layoutY="14.0" prefHeight="26.0" prefWidth="18.0" text="F" />
-            <TextField fx:id="fFirstLeft" layoutX="32.0" layoutY="27.0" prefHeight="26.0" prefWidth="29.0" />
-            <TextField fx:id="fFirstRight" layoutX="65.0" layoutY="27.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="94.0" layoutY="18.0" text="=" />
-            <TextField fx:id="fFirstX3" layoutX="108.0" layoutY="17.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="135.0" layoutY="22.0" text="x^3 + " />
-            <TextField fx:id="fFirstX2" layoutX="164.0" layoutY="17.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="193.0" layoutY="21.0" text="x^2+ " />
-            <TextField fx:id="fFirstX1" layoutX="216.0" layoutY="17.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="243.0" layoutY="21.0" text="x + " />
-            <TextField fx:id="fFirstX0" layoutX="261.0" layoutY="17.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="13.0" layoutY="61.0" prefHeight="26.0" prefWidth="18.0" text="F" />
-            <TextField fx:id="fSecondLeft" layoutX="31.0" layoutY="74.0" prefHeight="26.0" prefWidth="29.0" />
-            <TextField fx:id="fSecondRight" layoutX="64.0" layoutY="74.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="93.0" layoutY="65.0" text="=" />
-            <TextField fx:id="fSecondX3" layoutX="102.0" layoutY="64.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="130.0" layoutY="68.0" text="x^3 + " />
-            <TextField fx:id="fSecondX2" layoutX="159.0" layoutY="64.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="186.0" layoutY="68.0" text="x^2+ " />
-            <TextField fx:id="fSecondX1" layoutX="212.0" layoutY="64.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="240.0" layoutY="68.0" text="x + " />
-            <TextField fx:id="fSecondX0" layoutX="258.0" layoutY="64.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="11.0" layoutY="105.0" prefHeight="26.0" prefWidth="18.0" text="F" />
-            <TextField fx:id="fThirdLeft" layoutX="29.0" layoutY="118.0" prefHeight="26.0" prefWidth="29.0" />
-            <TextField fx:id="fThirdRight" layoutX="62.0" layoutY="118.0" prefHeight="26.0" prefWidth="32.0" />
-            <Label layoutX="91.0" layoutY="109.0" text="=" />
-            <TextField fx:id="fThirdX3" layoutX="101.0" layoutY="108.0" prefHeight="26.0" prefWidth="32.0" />
-            <Label layoutX="132.0" layoutY="113.0" text="x^3 + " />
-            <TextField fx:id="fThirdX2" layoutX="161.0" layoutY="108.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="188.0" layoutY="112.0" text="x^2+ " />
-            <TextField fx:id="fThirdX1" layoutX="213.0" layoutY="108.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="242.0" layoutY="112.0" text="x + " />
-            <TextField fx:id="fThirdX0" layoutX="258.0" layoutY="108.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="10.0" layoutY="153.0" prefHeight="26.0" prefWidth="18.0" text="F" />
-            <TextField fx:id="fFourthLeft" layoutX="28.0" layoutY="166.0" prefHeight="26.0" prefWidth="29.0" />
-            <TextField fx:id="fFourthRight" layoutX="61.0" layoutY="166.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="90.0" layoutY="157.0" text="=" />
-            <TextField fx:id="fFourthX3" layoutX="100.0" layoutY="156.0" prefHeight="26.0" prefWidth="32.0" />
-            <Label layoutX="132.0" layoutY="160.0" text="x^3 + " />
-            <TextField fx:id="fFourthX2" layoutX="160.0" layoutY="156.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="186.0" layoutY="160.0" text="x^2+ " />
-            <TextField fx:id="fFourthX1" layoutX="212.0" layoutY="156.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="239.0" layoutY="160.0" text="x + " />
-            <TextField fx:id="fFourthX0" layoutX="257.0" layoutY="156.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="11.0" layoutY="189.0" prefHeight="26.0" prefWidth="18.0" text="F" />
-            <TextField fx:id="fFifthLeft" layoutX="29.0" layoutY="202.0" prefHeight="26.0" prefWidth="32.0" />
-            <TextField fx:id="fFifthRight" layoutX="62.0" layoutY="202.0" prefHeight="26.0" prefWidth="32.0" />
-            <Label layoutX="91.0" layoutY="193.0" text="=" />
-            <TextField fx:id="fFifthX3" layoutX="105.0" layoutY="192.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="133.0" layoutY="196.0" text="x^3 + " />
-            <TextField fx:id="fFifthX2" layoutX="161.0" layoutY="192.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="189.0" layoutY="196.0" text="x^2+ " />
-            <TextField fx:id="fFifthX1" layoutX="213.0" layoutY="192.0" prefHeight="26.0" prefWidth="29.0" />
-            <Label layoutX="240.0" layoutY="196.0" text="x + " />
-            <TextField fx:id="fFifthX0" layoutX="258.0" layoutY="192.0" prefHeight="26.0" prefWidth="29.0" />
-         </children>
-      </Pane>
-      <ScrollPane layoutX="28.0" layoutY="14.0" prefHeight="253.0" prefWidth="234.0" vvalue="1.0">
+      <ScrollPane layoutX="14.0" layoutY="42.0" prefHeight="272.0" prefWidth="211.0" style="-fx-region-border: black; -fx-border-color: black;">
         <content>
-          <AnchorPane fx:id="left_scroll_anchor_pane" minHeight="0.0" minWidth="0.0" prefHeight="521.0" prefWidth="223.0">
+          <AnchorPane fx:id="left_scroll_anchor_pane" minHeight="0.0" minWidth="0.0" prefHeight="521.0" prefWidth="207.0">
                <children>
                   <HBox alignment="CENTER" layoutX="12.0" layoutY="6.0" prefHeight="26.0" prefWidth="179.0">
                      <children>
@@ -91,7 +39,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="146.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -108,7 +56,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="147.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -125,7 +73,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="146.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -142,7 +90,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="148.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -159,7 +107,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="141.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -176,7 +124,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="146.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -193,7 +141,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="144.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -210,7 +158,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="143.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -227,7 +175,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="144.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -244,7 +192,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="143.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -261,7 +209,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="142.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -278,7 +226,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="143.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -295,7 +243,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="146.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -304,7 +252,7 @@
                   </HBox>
                   <HBox alignment="CENTER" layoutX="12.0" layoutY="435.0" prefHeight="26.0" prefWidth="179.0">
                      <children>
-                        <Label alignment="CENTER" prefHeight="18.0" prefWidth="132.0" text="X14(0) = ">
+                        <Label alignment="CENTER" prefHeight="18.0" prefWidth="145.0" text="X14(0) = ">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
@@ -312,7 +260,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -321,7 +269,7 @@
                   </HBox>
                   <HBox alignment="CENTER" layoutX="11.0" layoutY="469.0" prefHeight="26.0" prefWidth="179.0">
                      <children>
-                        <Label alignment="CENTER" prefHeight="18.0" prefWidth="132.0" text="X15(0) = ">
+                        <Label alignment="CENTER" prefHeight="18.0" prefWidth="149.0" text="X15(0) = ">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
@@ -329,7 +277,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Label>
-                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0">
+                        <TextField alignment="BOTTOM_LEFT" prefHeight="26.0" prefWidth="160.0" text="1">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -340,5 +288,234 @@
             </AnchorPane>
         </content>
       </ScrollPane>
+      <Pane fx:id="right_pane" layoutX="233.0" layoutY="42.0" prefHeight="272.0" prefWidth="451.0" style="-fx-border-color: black;">
+         <children>
+            <HBox layoutX="9.0" layoutY="10.0" prefHeight="28.0" prefWidth="429.0" style="-fx-background-color: pink;">
+               <children>
+                  <HBox prefHeight="28.0" prefWidth="154.0" style="-fx-background-color: green;">
+                     <children>
+                        <Label prefHeight="24.0" prefWidth="45.0" text="F(X)">
+                           <font>
+                              <Font size="19.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox prefHeight="26.0" prefWidth="57.0" />
+                        <ChoiceBox prefHeight="26.0" prefWidth="63.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="28.0" prefWidth="275.0">
+                     <children>
+                        <Label text="=">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x^3+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="46.0" text="0" />
+                        <Label text="x^2+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="40.0" text="1" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox layoutX="9.0" layoutY="53.0" prefHeight="28.0" prefWidth="429.0" style="-fx-background-color: pink;">
+               <children>
+                  <HBox prefHeight="28.0" prefWidth="154.0" style="-fx-background-color: green;">
+                     <children>
+                        <Label prefHeight="24.0" prefWidth="45.0" text="F(X)">
+                           <font>
+                              <Font size="19.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox prefHeight="26.0" prefWidth="57.0" />
+                        <ChoiceBox prefHeight="26.0" prefWidth="63.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="28.0" prefWidth="275.0">
+                     <children>
+                        <Label text="=">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x^3+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="46.0" text="0" />
+                        <Label text="x^2+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="40.0" text="1" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox layoutX="9.0" layoutY="98.0" prefHeight="28.0" prefWidth="429.0" style="-fx-background-color: pink;">
+               <children>
+                  <HBox prefHeight="28.0" prefWidth="154.0" style="-fx-background-color: green;">
+                     <children>
+                        <Label prefHeight="24.0" prefWidth="45.0" text="F(X)">
+                           <font>
+                              <Font size="19.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox prefHeight="26.0" prefWidth="57.0" />
+                        <ChoiceBox prefHeight="26.0" prefWidth="63.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="28.0" prefWidth="275.0">
+                     <children>
+                        <Label text="=">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x^3+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="46.0" text="0" />
+                        <Label text="x^2+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="40.0" text="1" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox layoutX="9.0" layoutY="143.0" prefHeight="28.0" prefWidth="429.0" style="-fx-background-color: pink;">
+               <children>
+                  <HBox prefHeight="28.0" prefWidth="154.0" style="-fx-background-color: green;">
+                     <children>
+                        <Label prefHeight="24.0" prefWidth="45.0" text="F(X)">
+                           <font>
+                              <Font size="19.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox prefHeight="26.0" prefWidth="57.0" />
+                        <ChoiceBox prefHeight="26.0" prefWidth="63.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="28.0" prefWidth="275.0">
+                     <children>
+                        <Label text="=">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x^3+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="46.0" text="0" />
+                        <Label text="x^2+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="40.0" text="1" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox layoutX="10.0" layoutY="186.0" prefHeight="28.0" prefWidth="429.0" style="-fx-background-color: pink;">
+               <children>
+                  <HBox prefHeight="28.0" prefWidth="154.0" style="-fx-background-color: green;">
+                     <children>
+                        <Label prefHeight="24.0" prefWidth="45.0" text="F(X)">
+                           <font>
+                              <Font size="19.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox prefHeight="26.0" prefWidth="57.0" />
+                        <ChoiceBox prefHeight="26.0" prefWidth="63.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="28.0" prefWidth="275.0">
+                     <children>
+                        <Label text="=">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x^3+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="46.0" text="0" />
+                        <Label text="x^2+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="41.0" text="0" />
+                        <Label text="x+">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <TextField prefHeight="26.0" prefWidth="40.0" text="1" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+         </children>
+      </Pane>
+      <Label layoutX="45.0" layoutY="14.0" text="Начальные условия">
+         <font>
+            <Font name="System Bold" size="17.0" />
+         </font>
+      </Label>
+      <Label layoutX="345.0" layoutY="13.0" text="Коэффициенты полиномов">
+         <font>
+            <Font name="System Bold" size="19.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
