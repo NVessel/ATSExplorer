@@ -15,16 +15,26 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import org.apache.commons.math3.fitting.PolynomialCurveFitter;
+import org.apache.commons.math3.fitting.WeightedObservedPoint;
+import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.*;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class EnteringController implements Initializable {
 
+        private static final int ITERATIONS = 11;
         private static final Random RANDOM = new Random();
 
         @FXML
@@ -71,7 +81,7 @@ public class EnteringController implements Initializable {
                 double h = 0.01;                      // step size
                 double x0 = 0.0D;                     // initial value of x
                 double xn = 0.1D;
-                double[ ] yn = new double[15]; //results
+                double[] yn = new double[15]; //results
                 double[][] ynParts = new double[15][10];
                 DerivSystem systemDeriv = new DerivSystem();
                 systemDeriv.setCoefs(coefs);
@@ -93,6 +103,97 @@ public class EnteringController implements Initializable {
                 Scene scene = new Scene(load);
                 stage.setScene(scene);
                 stage.show();
+        }
+
+        @FXML
+        void calculateOnStatistics(ActionEvent event) throws URISyntaxException, IOException, InvalidFormatException {
+                List<List<Integer>> posNegMatrix = PosNegMatrixSupplier.getExternalMatrix();
+                List<List<Double>> statisticsMatrix = StatisticsSupplier.getExternalStatistics();
+                System.out.println(posNegMatrix);
+                System.out.println(statisticsMatrix);
+                double[] y0 = extractInitialValues(statisticsMatrix, posNegMatrix.size());
+                double[] y0copy = y0;
+                double h = 0.01;                      // step size
+                double x0 = 0.0D;                     // initial value of x
+                double xn = 0.1D;
+                double[] yn = new double[15]; //results
+                double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS];
+                DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix);
+                for (int j = 0; j < ITERATIONS; j++) {
+                        yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
+                        for (int i = 0; i < posNegMatrix.size(); i++) {
+                                ynParts[i][j] = yn[i];
+                        }
+                        y0 = yn;
+                        x0 += 0.1;
+                        xn += 0.1;
+                }
+               /* for (int i = 0; i < posNegMatrix.size(); i++) {
+                        System.out.printf("%f ", y0copy[i]);
+                }
+                System.out.println();
+                for (int j = 0; j < ITERATIONS; j++) {
+                        for (int i = 0; i < posNegMatrix.size(); i++) {
+                                System.out.printf("%f ", ynParts[i][j]);
+                        }
+                        System.out.println();
+                }*/
+                showResults(ynParts);
+        }
+
+        private void showResults(double[][] ynParts) throws IOException {
+                XSSFWorkbook resultBook = new XSSFWorkbook();
+                XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
+                Row firstRow = resultSheet.createRow(0);
+                for (int i = 0; i < 5; i++) {
+                        Cell rowCell = firstRow.createCell(i);
+                        rowCell.setCellValue(i);
+                }
+                Row secondRow = resultSheet.createRow(1);
+                for (int i = 0; i < 5; i++) {
+                        Cell rowCell = secondRow.createCell(i);
+                        rowCell.setCellValue(i * i);
+                }
+                XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
+                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 4, 7, 26);
+                XSSFChart chart = drawing.createChart(anchor);
+                chart.setTitleText("Test graph");
+                chart.setTitleOverlay(false);
+                XDDFChartLegend legend = chart.getOrAddLegend();
+                legend.setPosition(LegendPosition.TOP_RIGHT);
+
+                XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+                bottomAxis.setTitle("argument");
+                XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+                leftAxis.setTitle("pow");
+
+                XDDFNumericalDataSource<Double> arguments = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
+                        new CellRangeAddress(0, 0, 0, 4));
+
+                XDDFNumericalDataSource<Double> pows = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
+                        new CellRangeAddress(1, 1, 0, 4));
+
+                XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+
+                XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(arguments, pows);
+
+                series1.setTitle("explanation", null);
+                series1.setSmooth(true);
+                series1.setMarkerStyle(MarkerStyle.STAR);
+
+                chart.plot(data);
+
+                try (FileOutputStream fileOutputStream = new FileOutputStream("result.xlsx")) {
+                        resultBook.write(fileOutputStream);
+                }
+        }
+
+        private double[] extractInitialValues(List<List<Double>> statisticsMatrix, int processLimit) {
+                double[] initials = new double[processLimit];
+                for (int i = 0; i < processLimit; i++) {
+                        initials[i] = statisticsMatrix.get(i).get(0);
+                }
+                return initials;
         }
 
         @Override

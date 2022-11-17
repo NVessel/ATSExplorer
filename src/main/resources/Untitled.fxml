@@ -14,15 +14,15 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="EnteringController">
    <children>
-      <ButtonBar layoutX="353.0" layoutY="336.0" prefHeight="40.0" prefWidth="234.0" style="-fx-background-color: orange; -fx-border-color: black;">
+      <ButtonBar layoutX="350.0" layoutY="353.0" prefHeight="40.0" prefWidth="234.0" style="-fx-background-color: orange; -fx-border-color: black;">
         <buttons>
-          <Button fx:id="calculateButton" mnemonicParsing="false" onAction="#calculateDerivs" text="Расчёт" />
+          <Button fx:id="calculateButton" mnemonicParsing="false" onAction="#calculateDerivs" text="Расчет по введенным" />
         </buttons>
          <opaqueInsets>
             <Insets />
          </opaqueInsets>
          <padding>
-            <Insets right="75.0" />
+            <Insets right="50.0" />
          </padding>
       </ButtonBar>
       <ScrollPane layoutX="14.0" layoutY="42.0" prefHeight="272.0" prefWidth="211.0" style="-fx-region-border: black; -fx-border-color: black;">
@@ -517,5 +517,13 @@
             <Font name="System Bold" size="19.0" />
          </font>
       </Label>
+      <ButtonBar layoutX="350.0" layoutY="304.0" prefHeight="40.0" prefWidth="234.0" style="-fx-background-color: orange;">
+        <buttons>
+          <Button fx:id="statisticsCalculateButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#calculateOnStatistics" text="Расчет по статистике" />
+        </buttons>
+         <padding>
+            <Insets right="50.0" />
+         </padding>
+      </ButtonBar>
    </children>
 </AnchorPane>
