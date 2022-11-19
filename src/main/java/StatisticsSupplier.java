@@ -27,24 +27,10 @@ public class StatisticsSupplier {
             List<Double> rowCells = new ArrayList<>();
             for (Cell cell: row) {
                 CellType nextType = cell.getCellType();
-                switch (nextType) {
-                    case STRING:
-                        System.out.println("The cell was string and value was " + cell.getStringCellValue());
-                        break;
-                    case NUMERIC:
-                        System.out.println("The cell was numeric and value was " + cell.getNumericCellValue());
-                        break;
-                    case BLANK:
-                        System.out.println("The cell was blank format and address was " + cell.getAddress());
-                        break;
-                    case FORMULA:
-                        XSSFFormulaEvaluator formulaEvaluator = matrixWorkbook.getCreationHelper().createFormulaEvaluator();
-                        CellValue evaluated = formulaEvaluator.evaluate(cell);
-                        System.out.println("The cell was formula and expr was " + evaluated.getNumberValue());
-                        rowCells.add(evaluated.getNumberValue());
-                        break;
-                    default:
-                        throw new IllegalStateException("wrong cell type: " + nextType);
+                if (nextType == CellType.FORMULA) {
+                    XSSFFormulaEvaluator formulaEvaluator = matrixWorkbook.getCreationHelper().createFormulaEvaluator();
+                    CellValue evaluated = formulaEvaluator.evaluate(cell);
+                    rowCells.add(evaluated.getNumberValue());
                 }
             }
             if (!rowCells.isEmpty()) {

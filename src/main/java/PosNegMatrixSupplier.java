@@ -14,6 +14,8 @@ import java.util.List;
 
 public class PosNegMatrixSupplier {
 
+    private static final String STRING_FOR_SEEK = "X";
+
     public static int[][] getMatrix() {
         int[][] mas = new int[15][15];
         for (int i = 0; i < 15; i++) {
@@ -110,6 +112,7 @@ public class PosNegMatrixSupplier {
         return mas;
     }
 
+    //move common excel initializations
     public static List<List<Integer>> getExternalMatrix() throws URISyntaxException, IOException, InvalidFormatException {
         URL url = PosNegMatrixSupplier.class.getResource("/excel/new Max matrix.xlsx");
         assert url != null;
@@ -121,19 +124,8 @@ public class PosNegMatrixSupplier {
             List<Integer> rowCells = new ArrayList<>();
             for (Cell cell: row) {
                 CellType nextType = cell.getCellType();
-                switch (nextType) {
-                    case STRING:
-                        System.out.println("The cell was string and value was " + cell.getStringCellValue());
-                        break;
-                    case NUMERIC:
-                        System.out.println("The cell was numeric and value was " + cell.getNumericCellValue());
-                        rowCells.add((int) cell.getNumericCellValue());
-                        break;
-                    case BLANK:
-                        System.out.println("The cell was blank format and address was " + cell.getAddress());
-                        break;
-                    default:
-                        throw new IllegalStateException("wrong cell type");
+                if (nextType == CellType.NUMERIC) {
+                    rowCells.add((int) cell.getNumericCellValue());
                 }
             }
             if (!rowCells.isEmpty()) {
@@ -141,5 +133,27 @@ public class PosNegMatrixSupplier {
             }
         }
         return result;
+    }
+
+    public static List<String> getParametersNames() throws URISyntaxException, IOException, InvalidFormatException {
+        URL url = PosNegMatrixSupplier.class.getResource("/excel/new Max matrix.xlsx");
+        assert url != null;
+        File resourceFile = new File(url.toURI());
+        XSSFWorkbook matrixWorkbook = new XSSFWorkbook(resourceFile);
+        XSSFSheet firstSheet = matrixWorkbook.getSheetAt(0);
+        List<String> names = new ArrayList<>();
+        for (Row row: firstSheet) {
+            for (Cell cell: row) {
+                CellType nextType = cell.getCellType();
+                if (nextType == CellType.STRING
+                        && cell.getStringCellValue().contains(STRING_FOR_SEEK)) {
+                             names.add(cell.getStringCellValue());
+                }
+            }
+            if (!names.isEmpty()) {
+                break;
+            }
+        }
+        return names;
     }
 }

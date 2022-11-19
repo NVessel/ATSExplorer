@@ -43,7 +43,6 @@ public class DerivSystemV2 implements DerivnFunction {
         }
         PolynomialCurveFitter fitter = PolynomialCurveFitter.create(PRECISION_DEGREE);
         double[] coeffs = fitter.fit(weightedObservedPoints.toList());
-        System.out.println("For " + columnNumber + " column number and " + rowNumber + " rownumber coeefs were " + Arrays.toString(coeffs));
         return buildPoli(coeffs, usedValue);
     }
 

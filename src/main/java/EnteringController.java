@@ -15,26 +15,28 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoint;
-import org.apache.commons.math3.fitting.WeightedObservedPoints;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xddf.usermodel.chart.*;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
 
 public class EnteringController implements Initializable {
 
-        private static final int ITERATIONS = 11;
+        private static final int ITERATIONS_COUNT = 10;
         private static final Random RANDOM = new Random();
 
         @FXML
@@ -81,7 +83,7 @@ public class EnteringController implements Initializable {
                 double h = 0.01;                      // step size
                 double x0 = 0.0D;                     // initial value of x
                 double xn = 0.1D;
-                double[] yn = new double[15]; //results
+                double[] yn; //results
                 double[][] ynParts = new double[15][10];
                 DerivSystem systemDeriv = new DerivSystem();
                 systemDeriv.setCoefs(coefs);
@@ -109,17 +111,16 @@ public class EnteringController implements Initializable {
         void calculateOnStatistics(ActionEvent event) throws URISyntaxException, IOException, InvalidFormatException {
                 List<List<Integer>> posNegMatrix = PosNegMatrixSupplier.getExternalMatrix();
                 List<List<Double>> statisticsMatrix = StatisticsSupplier.getExternalStatistics();
-                System.out.println(posNegMatrix);
-                System.out.println(statisticsMatrix);
+                List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
                 double[] y0 = extractInitialValues(statisticsMatrix, posNegMatrix.size());
                 double[] y0copy = y0;
-                double h = 0.01;                      // step size
-                double x0 = 0.0D;                     // initial value of x
+                double h = 0.01;
+                double x0 = 0.0D;
                 double xn = 0.1D;
-                double[] yn = new double[15]; //results
-                double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS];
+                double[] yn;
+                double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS_COUNT];
                 DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix);
-                for (int j = 0; j < ITERATIONS; j++) {
+                for (int j = 0; j < ITERATIONS_COUNT; j++) {
                         yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
                         for (int i = 0; i < posNegMatrix.size(); i++) {
                                 ynParts[i][j] = yn[i];
@@ -128,23 +129,39 @@ public class EnteringController implements Initializable {
                         x0 += 0.1;
                         xn += 0.1;
                 }
-               /* for (int i = 0; i < posNegMatrix.size(); i++) {
-                        System.out.printf("%f ", y0copy[i]);
-                }
-                System.out.println();
-                for (int j = 0; j < ITERATIONS; j++) {
-                        for (int i = 0; i < posNegMatrix.size(); i++) {
-                                System.out.printf("%f ", ynParts[i][j]);
-                        }
-                        System.out.println();
-                }*/
-                showResults(ynParts);
+                showResults(y0copy, ynParts, parametersNames);
         }
 
-        private void showResults(double[][] ynParts) throws IOException {
+        //cell styles to provider class
+        private void showResults(double[] y0copy, double[][] ynParts, List<String> parametersNames) throws IOException {
                 XSSFWorkbook resultBook = new XSSFWorkbook();
                 XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
                 Row firstRow = resultSheet.createRow(0);
+                int shiftForNamings = 1;
+                for (int k = 0; k <= ITERATIONS_COUNT; k++) {
+                        Cell cell = firstRow.createCell(k + shiftForNamings);
+                        CellStyle cellStyle = resultBook.createCellStyle();
+                        Font headerFont = resultBook.createFont();
+                        headerFont.setBold(true);
+                        cellStyle.setFont(headerFont);
+                        cell.setCellStyle(cellStyle);
+                        double timeStep = (double) k / ITERATIONS_COUNT;
+                        cell.setCellValue("t = " + timeStep);
+                }
+
+                for (int i = 0; i < ynParts.length; i++) {
+                        //i+1 j+1 because of place for naming
+                        XSSFRow newRow = resultSheet.createRow(i + 1);
+                        for (int j = 0; j < ITERATIONS_COUNT; j++) {
+                                XSSFCell cell = newRow.createCell(j + 1 + shiftForNamings);
+                                cell.setCellValue(ynParts[i][j]);
+                        }
+                        XSSFCell cell = newRow.createCell(shiftForNamings); //because of beginning
+                        cell.setCellValue(y0copy[i]);
+                        cell = newRow.createCell(0); //because it's edge
+                        cell.setCellValue(parametersNames.get(i));
+                }
+                /*Row firstRow = resultSheet.createRow(0);
                 for (int i = 0; i < 5; i++) {
                         Cell rowCell = firstRow.createCell(i);
                         rowCell.setCellValue(i);
@@ -181,7 +198,8 @@ public class EnteringController implements Initializable {
                 series1.setSmooth(true);
                 series1.setMarkerStyle(MarkerStyle.STAR);
 
-                chart.plot(data);
+                chart.plot(data);*/
+
 
                 try (FileOutputStream fileOutputStream = new FileOutputStream("result.xlsx")) {
                         resultBook.write(fileOutputStream);
