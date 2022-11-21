@@ -2,7 +2,6 @@ import flanagan.integration.DerivnFunction;
 import org.apache.commons.math3.fitting.PolynomialCurveFitter;
 import org.apache.commons.math3.fitting.WeightedObservedPoints;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DerivSystemV2 implements DerivnFunction {

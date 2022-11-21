@@ -20,10 +20,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +35,10 @@ import java.util.ResourceBundle;
 
 public class EnteringController implements Initializable {
 
+        //rewrite hardcode and intersect variables
         private static final int ITERATIONS_COUNT = 10;
+        private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
+                "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
         private static final Random RANDOM = new Random();
 
         @FXML
@@ -132,14 +134,15 @@ public class EnteringController implements Initializable {
                 showResults(y0copy, ynParts, parametersNames);
         }
 
-        //cell styles to provider class
+        //cell styles to provider class when needed
         private void showResults(double[] y0copy, double[][] ynParts, List<String> parametersNames) throws IOException {
                 XSSFWorkbook resultBook = new XSSFWorkbook();
                 XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
                 Row firstRow = resultSheet.createRow(0);
-                int shiftForNamings = 1;
+                int shiftForColumnNamings = 1;
+                int shiftForRowNamings = 1;
                 for (int k = 0; k <= ITERATIONS_COUNT; k++) {
-                        Cell cell = firstRow.createCell(k + shiftForNamings);
+                        Cell cell = firstRow.createCell(k + shiftForColumnNamings);
                         CellStyle cellStyle = resultBook.createCellStyle();
                         Font headerFont = resultBook.createFont();
                         headerFont.setBold(true);
@@ -153,55 +156,43 @@ public class EnteringController implements Initializable {
                         //i+1 j+1 because of place for naming
                         XSSFRow newRow = resultSheet.createRow(i + 1);
                         for (int j = 0; j < ITERATIONS_COUNT; j++) {
-                                XSSFCell cell = newRow.createCell(j + 1 + shiftForNamings);
+                                XSSFCell cell = newRow.createCell(j + 1 + shiftForColumnNamings);
                                 cell.setCellValue(ynParts[i][j]);
                         }
-                        XSSFCell cell = newRow.createCell(shiftForNamings); //because of beginning
+                        XSSFCell cell = newRow.createCell(shiftForColumnNamings); //because of beginning
                         cell.setCellValue(y0copy[i]);
                         cell = newRow.createCell(0); //because it's edge
                         cell.setCellValue(parametersNames.get(i));
                 }
-                /*Row firstRow = resultSheet.createRow(0);
-                for (int i = 0; i < 5; i++) {
-                        Cell rowCell = firstRow.createCell(i);
-                        rowCell.setCellValue(i);
-                }
-                Row secondRow = resultSheet.createRow(1);
-                for (int i = 0; i < 5; i++) {
-                        Cell rowCell = secondRow.createCell(i);
-                        rowCell.setCellValue(i * i);
-                }
+
+                //hardcode
                 XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
-                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 4, 7, 26);
+                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 15, 14, 44);
                 XSSFChart chart = drawing.createChart(anchor);
-                chart.setTitleText("Test graph");
+                chart.setTitleText("My chart");
                 chart.setTitleOverlay(false);
                 XDDFChartLegend legend = chart.getOrAddLegend();
                 legend.setPosition(LegendPosition.TOP_RIGHT);
-
                 XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-                bottomAxis.setTitle("argument");
+                bottomAxis.setTitle("time");
                 XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-                leftAxis.setTitle("pow");
-
-                XDDFNumericalDataSource<Double> arguments = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
-                        new CellRangeAddress(0, 0, 0, 4));
-
-                XDDFNumericalDataSource<Double> pows = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
-                        new CellRangeAddress(1, 1, 0, 4));
-
+                leftAxis.setTitle("values");
                 XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+                data.setVaryColors(false);
 
-                XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(arguments, pows);
+                for (int i = 0; i < ynParts.length; i++) {
+                        XDDFCategoryDataSource timeArgument = XDDFDataSourcesFactory.fromArray(ITERATIONS_MOMENTS);
+                        XDDFNumericalDataSource<Double> resultParameterValues = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
+                                new CellRangeAddress(i + shiftForRowNamings, i + shiftForRowNamings,
+                                        shiftForColumnNamings, shiftForColumnNamings + ITERATIONS_COUNT));
+                        XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(timeArgument, resultParameterValues);
+                        series1.setTitle(parametersNames.get(i), null);
+                        series1.setSmooth(true);
+                        series1.setMarkerStyle(MarkerStyle.STAR);
+                }
 
-                series1.setTitle("explanation", null);
-                series1.setSmooth(true);
-                series1.setMarkerStyle(MarkerStyle.STAR);
-
-                chart.plot(data);*/
-
-
-                try (FileOutputStream fileOutputStream = new FileOutputStream("result.xlsx")) {
+                chart.plot(data);
+                try (FileOutputStream fileOutputStream = new FileOutputStream("resultBook.xlsx")) {
                         resultBook.write(fileOutputStream);
                 }
         }
