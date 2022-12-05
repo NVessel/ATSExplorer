@@ -1,3 +1,7 @@
+package controller;
+
+import deriv.DerivSystem;
+import deriv.DerivSystemV2;
 import flanagan.integration.RungeKutta;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,6 +27,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
+import suppliers.CoefMatrixSupplier;
+import suppliers.PosNegMatrixSupplier;
+import suppliers.StatisticsSupplier;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,11 +42,14 @@ import java.util.ResourceBundle;
 
 public class EnteringController implements Initializable {
 
-        //rewrite hardcode and intersect variables
+        //rewrite hardcode only to iterations count
         private static final int ITERATIONS_COUNT = 10;
         private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
                 "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
         private static final Random RANDOM = new Random();
+
+        private static final int GRAPHS_FIRST_ROW = 15;
+        private static final int GRAPH_LENGTH = 29;
 
         @FXML
         private Button calculateButton;
@@ -131,11 +141,10 @@ public class EnteringController implements Initializable {
                         x0 += 0.1;
                         xn += 0.1;
                 }
-                showResults(y0copy, ynParts, parametersNames);
+                showResults(y0copy, ynParts, statisticsMatrix, parametersNames);
         }
 
-        //cell styles to provider class when needed
-        private void showResults(double[] y0copy, double[][] ynParts, List<String> parametersNames) throws IOException {
+        private void showResults(double[] y0copy, double[][] ynParts, List<List<Double>> statisticsMatrix, List<String> parametersNames) throws IOException {
                 XSSFWorkbook resultBook = new XSSFWorkbook();
                 XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
                 Row firstRow = resultSheet.createRow(0);
@@ -165,33 +174,32 @@ public class EnteringController implements Initializable {
                         cell.setCellValue(parametersNames.get(i));
                 }
 
-                //hardcode
-                XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
-                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, 15, 14, 44);
-                XSSFChart chart = drawing.createChart(anchor);
-                chart.setTitleText("My chart");
-                chart.setTitleOverlay(false);
-                XDDFChartLegend legend = chart.getOrAddLegend();
-                legend.setPosition(LegendPosition.TOP_RIGHT);
-                XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-                bottomAxis.setTitle("time");
-                XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-                leftAxis.setTitle("values");
-                XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-                data.setVaryColors(false);
-
                 for (int i = 0; i < ynParts.length; i++) {
+                        XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
+                        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0,
+                                GRAPHS_FIRST_ROW + (GRAPH_LENGTH + 3) * i, 12, GRAPHS_FIRST_ROW + GRAPH_LENGTH + (GRAPH_LENGTH + 3) * i);
+                        XSSFChart chart = drawing.createChart(anchor);
+                        XDDFChartLegend legend = chart.getOrAddLegend();
+                        legend.setPosition(LegendPosition.TOP_RIGHT);
+                        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+                        bottomAxis.setTitle("Время");
+                        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+                        leftAxis.setTitle("Значение");
+                        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+                        data.setVaryColors(false);
                         XDDFCategoryDataSource timeArgument = XDDFDataSourcesFactory.fromArray(ITERATIONS_MOMENTS);
                         XDDFNumericalDataSource<Double> resultParameterValues = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
                                 new CellRangeAddress(i + shiftForRowNamings, i + shiftForRowNamings,
                                         shiftForColumnNamings, shiftForColumnNamings + ITERATIONS_COUNT));
+                        XDDFNumericalDataSource<Double> realParameterValues = XDDFDataSourcesFactory.fromArray(statisticsMatrix.get(i).toArray(new Double[0]));
                         XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(timeArgument, resultParameterValues);
-                        series1.setTitle(parametersNames.get(i), null);
+                        XDDFLineChartData.Series series2 = (XDDFLineChartData.Series) data.addSeries(timeArgument, realParameterValues);
+                        series1.setTitle("Полученное " + parametersNames.get(i));
                         series1.setSmooth(true);
                         series1.setMarkerStyle(MarkerStyle.STAR);
+                        series2.setTitle("Достоверное " + parametersNames.get(i));
+                        chart.plot(data);
                 }
-
-                chart.plot(data);
                 try (FileOutputStream fileOutputStream = new FileOutputStream("resultBook.xlsx")) {
                         resultBook.write(fileOutputStream);
                 }

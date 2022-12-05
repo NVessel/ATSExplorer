@@ -1,3 +1,5 @@
+package suppliers;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -112,7 +114,6 @@ public class PosNegMatrixSupplier {
         return mas;
     }
 
-    //move common excel initializations
     public static List<List<Integer>> getExternalMatrix() throws URISyntaxException, IOException, InvalidFormatException {
         URL url = PosNegMatrixSupplier.class.getResource("/excel/new Max matrix.xlsx");
         assert url != null;

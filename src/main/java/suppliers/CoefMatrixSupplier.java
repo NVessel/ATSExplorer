@@ -1,3 +1,5 @@
+package suppliers;
+
 public class CoefMatrixSupplier {
 
     private static final String VECTOR_ONE = "0,0,0,1";
