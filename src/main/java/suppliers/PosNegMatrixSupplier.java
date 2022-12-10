@@ -133,6 +133,7 @@ public class PosNegMatrixSupplier {
                 result.add(rowCells);
             }
         }
+        matrixWorkbook.close();
         return result;
     }
 
@@ -155,6 +156,7 @@ public class PosNegMatrixSupplier {
                 break;
             }
         }
+        matrixWorkbook.close();
         return names;
     }
 }

@@ -39,6 +39,7 @@ public class StatisticsSupplier {
                 result.add(rowCells);
             }
         }
+        matrixWorkbook.close();
         return transposeMatrix(result);
     }
 
