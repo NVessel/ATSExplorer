@@ -123,7 +123,8 @@ public class EnteringController implements Initializable {
         void calculateOnStatistics(ActionEvent event) throws URISyntaxException, IOException, InvalidFormatException {
                 List<List<Integer>> posNegMatrix = PosNegMatrixSupplier.getExternalMatrix();
                 List<List<Double>> statisticsMatrix = StatisticsSupplier.getExternalStatistics();
-                List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
+            System.out.println(statisticsMatrix);
+            List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
                 double[] y0 = extractInitialValues(statisticsMatrix, posNegMatrix.size());
                 double[] y0copy = y0;
                 double h = 0.01;
@@ -131,7 +132,7 @@ public class EnteringController implements Initializable {
                 double xn = 0.1D;
                 double[] yn;
                 double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS_COUNT];
-                DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix);
+                DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix, parametersNames);
                 for (int j = 0; j < ITERATIONS_COUNT; j++) {
                         yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
                         for (int i = 0; i < posNegMatrix.size(); i++) {

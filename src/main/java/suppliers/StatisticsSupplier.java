@@ -11,6 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -32,7 +34,10 @@ public class StatisticsSupplier {
                 if (nextType == CellType.FORMULA) {
                     XSSFFormulaEvaluator formulaEvaluator = matrixWorkbook.getCreationHelper().createFormulaEvaluator();
                     CellValue evaluated = formulaEvaluator.evaluate(cell);
-                    rowCells.add(evaluated.getNumberValue());
+                    double roundValue = BigDecimal.valueOf(evaluated.getNumberValue())
+                            .setScale(2, RoundingMode.HALF_UP)
+                            .doubleValue();
+                    rowCells.add(roundValue);
                 }
             }
             if (!rowCells.isEmpty()) {

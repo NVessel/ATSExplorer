@@ -21,11 +21,13 @@ public class DerivSystemV2 implements DerivnFunction {
 
     private final List<List<Integer>> posNegMatrix;
     private final List<List<Double>> statMatrix;
+    private final List<String> parametersNames;
     private final List<RowColumnToPolyCoeffs> rowColumnToPolyCoeffsCache = new LinkedList<>();
 
-    public DerivSystemV2(List<List<Integer>> posNegMatrix, List<List<Double>> statMatrix) {
+    public DerivSystemV2(List<List<Integer>> posNegMatrix, List<List<Double>> statMatrix, List<String> parametersNames) {
         this.posNegMatrix = posNegMatrix;
         this.statMatrix = statMatrix;
+        this.parametersNames = parametersNames;
     }
 
     @Override
@@ -55,7 +57,6 @@ public class DerivSystemV2 implements DerivnFunction {
     private double buildAndSavePoly(int rowNumber, int columnNumber, double usedValue) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         double[] sampleY = new double[statMatrix.get(0).size()];
-        //2 because of second degree polynomial
         double[][] sampleX = new double[statMatrix.get(0).size()][3];
         for (int k = 0; k < statMatrix.get(0).size(); k++) {
             sampleY[k] = statMatrix.get(rowNumber).get(k);
@@ -64,9 +65,9 @@ public class DerivSystemV2 implements DerivnFunction {
             sampleX[k][2] = Math.pow(statMatrix.get(columnNumber).get(k), 3);
             regression.newSampleData(sampleY, sampleX);
         }
-        double[] coeffs = regression.estimateRegressionParameters();
-        this.rowColumnToPolyCoeffsCache.add(new RowColumnToPolyCoeffs(new Pair<>(rowNumber, columnNumber), coeffs));
-        return calcPoly(coeffs, usedValue);
+        double[] coeffsOfPoly = regression.estimateRegressionParameters();
+        this.rowColumnToPolyCoeffsCache.add(new RowColumnToPolyCoeffs(new Pair<>(rowNumber, columnNumber), coeffsOfPoly));
+        return calcPoly(coeffsOfPoly, usedValue);
     }
 
     private double calcPoly(double[] coeffs, double usedValue) {
@@ -109,7 +110,6 @@ public class DerivSystemV2 implements DerivnFunction {
         }
     }
 
-    //double[] need to support, not Double[]
     private void showPoly(int rowNumber, int columnNumber, double[] coeffs, XSSFDrawing drawingPatriarch, int offsetRow, int offsetColumn) {
         XSSFClientAnchor anchor = drawingPatriarch.createAnchor(0, 0, 0, 0,
                 (GRAPH_WIDTH + 3) * offsetColumn, (GRAPH_LENGTH + 3) * offsetRow,
@@ -118,10 +118,9 @@ public class DerivSystemV2 implements DerivnFunction {
         XDDFChartLegend legend = chart.getOrAddLegend();
         legend.setPosition(LegendPosition.TOP_RIGHT);
         XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        //because of 0-index
-        bottomAxis.setTitle("Значение независимого параметра X " + (columnNumber + 1));
+        bottomAxis.setTitle("Значение независимого параметра: " + parametersNames.get(columnNumber));
         XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-        leftAxis.setTitle("Значение зависимого параметра X " + (rowNumber + 1));
+        leftAxis.setTitle("Значение зависимого параметра: " + parametersNames.get(rowNumber));
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
         data.setVaryColors(false);
         XDDFNumericalDataSource<Double> independentStatisticParameterValues = XDDFDataSourcesFactory.fromArray(statMatrix.get(columnNumber).toArray(new Double[0]));
