@@ -2,8 +2,7 @@ package deriv;
 
 import flanagan.integration.DerivnFunction;
 import model.RowColumnToPolyCoeffs;
-import org.apache.commons.math3.fitting.PolynomialCurveFitter;
-import org.apache.commons.math3.fitting.WeightedObservedPoints;
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -17,8 +16,6 @@ public class DerivSystemV2 implements DerivnFunction {
 
     private static final int GRAPH_WIDTH = 10;
     private static final int GRAPH_LENGTH = 20;
-
-    private static final int PRECISION_DEGREE = 2;
 
     private static final boolean IS_ENABLED_POLY_DRAWING = true;
 
@@ -56,12 +53,18 @@ public class DerivSystemV2 implements DerivnFunction {
 
     //useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save perfomance
     private double buildAndSavePoly(int rowNumber, int columnNumber, double usedValue) {
-        WeightedObservedPoints weightedObservedPoints = new WeightedObservedPoints();
+        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+        double[] sampleY = new double[statMatrix.get(0).size()];
+        //2 because of second degree polynomial
+        double[][] sampleX = new double[statMatrix.get(0).size()][3];
         for (int k = 0; k < statMatrix.get(0).size(); k++) {
-            weightedObservedPoints.add(statMatrix.get(columnNumber).get(k), statMatrix.get(rowNumber).get(k));
+            sampleY[k] = statMatrix.get(rowNumber).get(k);
+            sampleX[k][0] = statMatrix.get(columnNumber).get(k);
+            sampleX[k][1] = Math.pow(statMatrix.get(columnNumber).get(k), 2);
+            sampleX[k][2] = Math.pow(statMatrix.get(columnNumber).get(k), 3);
+            regression.newSampleData(sampleY, sampleX);
         }
-        PolynomialCurveFitter fitter = PolynomialCurveFitter.create(PRECISION_DEGREE);
-        double[] coeffs = fitter.fit(weightedObservedPoints.toList());
+        double[] coeffs = regression.estimateRegressionParameters();
         this.rowColumnToPolyCoeffsCache.add(new RowColumnToPolyCoeffs(new Pair<>(rowNumber, columnNumber), coeffs));
         return calcPoly(coeffs, usedValue);
     }
