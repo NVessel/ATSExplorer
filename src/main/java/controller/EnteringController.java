@@ -42,7 +42,7 @@ import java.util.ResourceBundle;
 
 public class EnteringController implements Initializable {
 
-        //rewrite hardcode only to iterations count
+        //rewrite hardcode and only one const to remain
         private static final int ITERATIONS_COUNT = 10;
         private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
                 "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
@@ -92,10 +92,10 @@ public class EnteringController implements Initializable {
                         }
                         coefs[--choiceLeftValue][--choiceRightValue] = joinCoefs;
                 }
-                double h = 0.01;                      // step size
-                double x0 = 0.0D;                     // initial value of x
+                double h = 0.01;
+                double x0 = 0.0D;
                 double xn = 0.1D;
-                double[] yn; //results
+                double[] yn;
                 double[][] ynParts = new double[15][10];
                 DerivSystem systemDeriv = new DerivSystem();
                 systemDeriv.setCoefs(coefs);
@@ -123,8 +123,7 @@ public class EnteringController implements Initializable {
         void calculateOnStatistics(ActionEvent event) throws URISyntaxException, IOException, InvalidFormatException {
                 List<List<Integer>> posNegMatrix = PosNegMatrixSupplier.getExternalMatrix();
                 List<List<Double>> statisticsMatrix = StatisticsSupplier.getExternalStatistics();
-            System.out.println(statisticsMatrix);
-            List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
+                List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
                 double[] y0 = extractInitialValues(statisticsMatrix, posNegMatrix.size());
                 double[] y0copy = y0;
                 double h = 0.01;
@@ -135,6 +134,7 @@ public class EnteringController implements Initializable {
                 DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix, parametersNames);
                 for (int j = 0; j < ITERATIONS_COUNT; j++) {
                         yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
+                        yn = correctEvaluations(yn, j, statisticsMatrix);
                         for (int i = 0; i < posNegMatrix.size(); i++) {
                                 ynParts[i][j] = yn[i];
                         }
@@ -145,7 +145,15 @@ public class EnteringController implements Initializable {
                 showResults(y0copy, ynParts, statisticsMatrix, parametersNames);
         }
 
-        private void showResults(double[] y0copy, double[][] ynParts, List<List<Double>> statisticsMatrix, List<String> parametersNames) throws IOException {
+    private double[] correctEvaluations(double[] yn, int timeCount, List<List<Double>> statisticsMatrix) {
+        double[] correctedYn = new double[yn.length];
+        for (int i = 0; i < yn.length; i++) {
+            correctedYn[i] = yn[i] * (statisticsMatrix.get(i).get(timeCount+1) / yn[i]);
+        }
+        return correctedYn;
+    }
+
+    private void showResults(double[] y0copy, double[][] ynParts, List<List<Double>> statisticsMatrix, List<String> parametersNames) throws IOException {
                 XSSFWorkbook resultBook = new XSSFWorkbook();
                 XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
                 Row firstRow = resultSheet.createRow(0);

@@ -15,12 +15,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DerivSystemV2 implements DerivnFunction {
 
+    private final Logger logger = Logger.getLogger(DerivSystemV2.class.getName());
+
     private static final int GRAPH_WIDTH = 10;
     private static final int GRAPH_LENGTH = 20;
-
     private static final boolean IS_ENABLED_POLY_DRAWING = true;
 
     private final List<List<Integer>> posNegMatrix;
@@ -57,7 +60,7 @@ public class DerivSystemV2 implements DerivnFunction {
         return dxdt;
     }
 
-    //useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save perfomance
+    //useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save performance
     private double buildAndSavePoly(int rowNumber, int columnNumber, double usedValue) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         double[] sampleY = new double[statMatrix.get(0).size()];
@@ -112,6 +115,7 @@ public class DerivSystemV2 implements DerivnFunction {
             resultBook.write(fileOutputStream);
             resultBook.close();
         } catch (IOException e) {
+            logger.log(Level.SEVERE, "resultPolyBook file is broken");
             e.printStackTrace();
         }
     }
@@ -127,57 +131,10 @@ public class DerivSystemV2 implements DerivnFunction {
         bottomAxis.setTitle("Значение независимого параметра: " + parametersNames.get(columnNumber));
         XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
         leftAxis.setTitle("Значение зависимого параметра: " + parametersNames.get(rowNumber));
+
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
         data.setVaryColors(false);
-        //fixme sorry for this
-        List<Pair<Double, Double>> pairs = new ArrayList<>();
-        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
-            pairs.add(new Pair<>(statMatrix.get(columnNumber).get(i), statMatrix.get(rowNumber).get(i)));
-        }
-        pairs.sort(new Comparator<>() {
-            @Override
-            public int compare(Pair<Double, Double> o1, Pair<Double, Double> o2) {
-                return o1.getFirst().compareTo(o2.getFirst());
-            }
-        });
-        Double[] first = new Double[statMatrix.get(columnNumber).size()];
-        Double[] second = new Double[statMatrix.get(rowNumber).size()];
-        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
-            first[i] = pairs.get(i).getFirst();
-            second[i] = pairs.get(i).getSecond();
-        }
-        XDDFNumericalDataSource<Double> newIndStatVals = XDDFDataSourcesFactory.fromArray(first);
-        XDDFNumericalDataSource<Double> newDepStatVals = XDDFDataSourcesFactory.fromArray(second);
-
-        Double[] calcValues = calcPoly(coeffs, statMatrix.get(columnNumber).toArray(new Double[0]));
-        pairs.clear();
-        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
-            pairs.add(new Pair<>(statMatrix.get(columnNumber).get(i), calcValues[i]));
-        }
-        pairs.sort(new Comparator<>() {
-            @Override
-            public int compare(Pair<Double, Double> o1, Pair<Double, Double> o2) {
-                return o1.getFirst().compareTo(o2.getFirst());
-            }
-        });
-        first = new Double[statMatrix.get(columnNumber).size()];
-        second = new Double[statMatrix.get(rowNumber).size()];
-        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
-            first[i] = pairs.get(i).getFirst();
-            second[i] = pairs.get(i).getSecond();
-        }
-        XDDFNumericalDataSource<Double> newIndStatVals2 = XDDFDataSourcesFactory.fromArray(first);
-        XDDFNumericalDataSource<Double> newDepStatVals2 = XDDFDataSourcesFactory.fromArray(second);
-
-        XDDFNumericalDataSource<Double> independentStatisticParameterValues = XDDFDataSourcesFactory.fromArray(statMatrix.get(columnNumber).toArray(new Double[0]));
-        XDDFNumericalDataSource<Double> dependentStatisticParameterValues = XDDFDataSourcesFactory.fromArray(statMatrix.get(rowNumber).toArray(new Double[0]));
-        XDDFNumericalDataSource<Double> dependentCalculatedParameterValues = XDDFDataSourcesFactory.fromArray(calcPoly(coeffs, statMatrix.get(columnNumber).toArray(new Double[0])));
-        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(newIndStatVals, newDepStatVals);
-        XDDFLineChartData.Series series2 = (XDDFLineChartData.Series) data.addSeries(newIndStatVals2, newDepStatVals2);
-        series.setTitle("Зависимость из статистики");
-        series.setSmooth(true);
-        series.setMarkerStyle(MarkerStyle.STAR);
-        series2.setTitle("Построенный многочлен: " + buildPolyTitle(rowNumber, columnNumber, coeffs));
+        enrichChartDataWithSeries(rowNumber, columnNumber, coeffs, data);
         chart.plot(data);
     }
 
@@ -185,5 +142,43 @@ public class DerivSystemV2 implements DerivnFunction {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coeffs);
         String polyPart = polynomialFunction.toString().replace("x", "X" + (columnNumber + 1));
         return "X" + (rowNumber + 1) + " = " + polyPart;
+    }
+
+    private void enrichChartDataWithSeries(int rowNumber, int columnNumber, double[] coeffs, XDDFLineChartData data) {
+        List<Pair<Double, Double>> statisticPairs = new ArrayList<>();
+        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
+            statisticPairs.add(new Pair<>(statMatrix.get(columnNumber).get(i), statMatrix.get(rowNumber).get(i)));
+        }
+        statisticPairs.sort(Comparator.comparing(Pair::getFirst));
+        //arrays for Apache poi creating graphs, it isn't supporting lists
+        Double[] independentParameterStatistic = new Double[statMatrix.get(columnNumber).size()];
+        Double[] dependentParameterStatistic = new Double[statMatrix.get(rowNumber).size()];
+        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
+            independentParameterStatistic[i] = statisticPairs.get(i).getFirst();
+            dependentParameterStatistic[i] = statisticPairs.get(i).getSecond();
+        }
+        XDDFNumericalDataSource<Double> independentParamStatisticDataSource = XDDFDataSourcesFactory.fromArray(independentParameterStatistic);
+        XDDFNumericalDataSource<Double> dependentParamStatisticDataSource = XDDFDataSourcesFactory.fromArray(dependentParameterStatistic);
+        XDDFLineChartData.Series series = (XDDFLineChartData.Series) data.addSeries(independentParamStatisticDataSource, dependentParamStatisticDataSource);
+
+        Double[] regressionCalculatedValues = calcPoly(coeffs, statMatrix.get(columnNumber).toArray(new Double[0]));
+        statisticPairs.clear();
+        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
+            statisticPairs.add(new Pair<>(statMatrix.get(columnNumber).get(i), regressionCalculatedValues[i]));
+        }
+        statisticPairs.sort(Comparator.comparing(Pair::getFirst));
+        independentParameterStatistic = new Double[statMatrix.get(columnNumber).size()];
+        dependentParameterStatistic = new Double[statMatrix.get(rowNumber).size()];
+        for (int i = 0; i < statMatrix.get(columnNumber).size(); i++) {
+            independentParameterStatistic[i] = statisticPairs.get(i).getFirst();
+            dependentParameterStatistic[i] = statisticPairs.get(i).getSecond();
+        }
+        independentParamStatisticDataSource = XDDFDataSourcesFactory.fromArray(independentParameterStatistic);
+        dependentParamStatisticDataSource = XDDFDataSourcesFactory.fromArray(dependentParameterStatistic);
+        XDDFLineChartData.Series series2 = (XDDFLineChartData.Series) data.addSeries(independentParamStatisticDataSource, dependentParamStatisticDataSource);
+        series.setTitle("Зависимость из статистики");
+        series.setSmooth(true);
+        series.setMarkerStyle(MarkerStyle.STAR);
+        series2.setTitle("Построенный многочлен: " + buildPolyTitle(rowNumber, columnNumber, coeffs));
     }
 }
