@@ -2,13 +2,18 @@ package model;
 
 import org.apache.commons.math3.util.Pair;
 
-public class RowColumnToPolyCoeffs {
+import java.util.Map;
+
+public class RowColumnToRegressionModel {
     private Pair<Integer, Integer> rowColumn;
     private double[] polyCoeffs;
+    private Map<String, Double> regressionMetrics;
 
-    public RowColumnToPolyCoeffs(Pair<Integer, Integer> rowColumn, double[] polyCoeffs) {
+    public RowColumnToRegressionModel(Pair<Integer, Integer> rowColumn,
+                                      double[] polyCoeffs, Map<String, Double> regressionMetrics) {
         this.rowColumn = rowColumn;
         this.polyCoeffs = polyCoeffs;
+        this.regressionMetrics = regressionMetrics;
     }
 
     public Pair<Integer, Integer> getRowColumn() {
@@ -25,5 +30,13 @@ public class RowColumnToPolyCoeffs {
 
     public void setPolyCoeffs(double[] polyCoeffs) {
         this.polyCoeffs = polyCoeffs;
+    }
+
+    public Map<String, Double> getRegressionMetrics() {
+        return regressionMetrics;
+    }
+
+    public void setRegressionMetrics(Map<String, Double> regressionMetrics) {
+        this.regressionMetrics = regressionMetrics;
     }
 }

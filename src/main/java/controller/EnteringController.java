@@ -131,6 +131,7 @@ public class EnteringController implements Initializable {
                 double xn = 0.1D;
                 double[] yn;
                 double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS_COUNT];
+                double[][] ynPartsCorrected = new double[posNegMatrix.size()][ITERATIONS_COUNT];
                 DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix, parametersNames);
                 for (int j = 0; j < ITERATIONS_COUNT; j++) {
                         yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
