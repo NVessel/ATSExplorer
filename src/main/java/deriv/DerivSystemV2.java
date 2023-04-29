@@ -4,6 +4,7 @@ import flanagan.integration.DerivnFunction;
 import model.RowColumnToRegressionModel;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -55,7 +56,7 @@ public class DerivSystemV2 implements DerivnFunction {
                     negPolynomMultiplication *= buildAndSavePoly(i, j, x[j]);
                 }
             }
-            dxdt[i] = calculateExternalFactorsSum(t, true) * posPolynomMultiplication - calculateExternalFactorsSum(t, false) * negPolynomMultiplication;
+            dxdt[i] = calculateExternalFactorsSum(i, t, true) * posPolynomMultiplication - calculateExternalFactorsSum(i, t, false) * negPolynomMultiplication;
         }
         if (IS_ENABLED_POLY_DRAWING) {
             showPolys();
@@ -82,6 +83,13 @@ public class DerivSystemV2 implements DerivnFunction {
         Map<String, Double> regressionStatParams = collectRegressionStatParams(regression);
         this.rowColumnToRegressionModelCache.add(new RowColumnToRegressionModel(new Pair<>(rowNumber, columnNumber), coeffsOfPoly, regressionStatParams));
         return calcPoly(coeffsOfPoly, usedValue);
+    }
+
+    private double buildAndSaveExternalFactor(int j, double t) {
+        SimpleRegression simpleRegression = new SimpleRegression();
+        simpleRegression.addData(0, statMatrix.get(j).get(0));
+        simpleRegression.addData(1, statMatrix.get(j).get(statMatrix.get(j).size() - 1));
+        return simpleRegression.predict(t);
     }
 
     private Map<String, Double> collectRegressionStatParams(OLSMultipleLinearRegression regression) {
@@ -118,9 +126,17 @@ public class DerivSystemV2 implements DerivnFunction {
         return resultArray;
     }
 
-    //Turned off for now
-    private double calculateExternalFactorsSum(double t, boolean isPositiveSide) {
-        return 1;
+    private double calculateExternalFactorsSum(int rowNumber, double t, boolean isPositiveSide) {
+        double resultSum = 1;
+        //strange indexes, but now it's loose coupled to sizes of matrix
+        for (int j = this.posNegMatrix.size(); j < this.posNegMatrix.get(0).size(); j++) {
+            if ((posNegMatrix.get(rowNumber).get(j) == 1) && isPositiveSide) {
+                resultSum += buildAndSaveExternalFactor(j, t);
+            } else if ((posNegMatrix.get(rowNumber).get(j) == -1) && !isPositiveSide) {
+                resultSum += buildAndSaveExternalFactor(j, t);
+            }
+        }
+        return resultSum;
     }
 
     private void showPolys() {
