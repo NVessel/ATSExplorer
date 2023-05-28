@@ -1,6 +1,10 @@
 package deriv;
 
+import builder.LatexFileBuilder;
 import flanagan.integration.DerivnFunction;
+import model.ExternalFactorPolynomial;
+import model.ParameterPolynomial;
+import model.ParameterToDependencies;
 import model.RowColumnToRegressionModel;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
@@ -14,10 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,10 +32,13 @@ public class DerivSystemV2 implements DerivnFunction {
     private static final int GRAPH_LENGTH = 20;
     private static final boolean IS_ENABLED_POLY_DRAWING = true;
 
+    private List<ParameterPolynomial> parameterPolynomialList;
+    private List<ExternalFactorPolynomial> externalFactorPolynomialList;
     private final List<List<Integer>> posNegMatrix;
     private final List<List<Double>> statMatrix;
     private final List<String> parametersNames;
     private final List<RowColumnToRegressionModel> rowColumnToRegressionModelCache = new LinkedList<>();
+    private final List<ParameterToDependencies> parameterToDependenciesCache = new LinkedList<>();
 
     public DerivSystemV2(List<List<Integer>> posNegMatrix, List<List<Double>> statMatrix, List<String> parametersNames) {
         this.posNegMatrix = posNegMatrix;
@@ -48,25 +52,33 @@ public class DerivSystemV2 implements DerivnFunction {
         for (int i = 0; i < this.posNegMatrix.size(); i++) {
             double posPolynomMultiplication = 1;
             double negPolynomMultiplication = 1;
+            this.parameterPolynomialList = new ArrayList<>();
+            this.externalFactorPolynomialList = new ArrayList<>();
             for (int j = 0; j < this.posNegMatrix.size(); j++) {
                 if (posNegMatrix.get(i).get(j) == 1) {
-                    posPolynomMultiplication *= buildAndSavePoly(i, j, x[j]);
+                    posPolynomMultiplication *= buildAndSavePoly(i, j, x[j], true);
                 }
                 else if (posNegMatrix.get(i).get(j) == -1) {
-                    negPolynomMultiplication *= buildAndSavePoly(i, j, x[j]);
+                    negPolynomMultiplication *= buildAndSavePoly(i, j, x[j], false);
                 }
             }
-            dxdt[i] = calculateExternalFactorsSum(i, t, true) * posPolynomMultiplication - calculateExternalFactorsSum(i, t, false) * negPolynomMultiplication;
+            dxdt[i] = calculateExternalFactorsSum(i, t, true) * posPolynomMultiplication
+                    - calculateExternalFactorsSum(i, t, false) * negPolynomMultiplication;
+            parameterToDependenciesCache.add(new ParameterToDependencies(i, this.parameterPolynomialList, this.externalFactorPolynomialList));
         }
+        //useless multiple drawings during one traverse, it can be drowned only once
         if (IS_ENABLED_POLY_DRAWING) {
             showPolys();
         }
+        LatexFileBuilder latexFileBuilder = new LatexFileBuilder(parameterToDependenciesCache);
+        latexFileBuilder.writeSystemToLatex();
+        parameterToDependenciesCache.clear();
         rowColumnToRegressionModelCache.clear();
         return dxdt;
     }
 
     //useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save performance
-    private double buildAndSavePoly(int rowNumber, int columnNumber, double usedValue) {
+    private double buildAndSavePoly(int rowNumber, int columnNumber, double usedValue, boolean isPositiveSide) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         double[] sampleY = new double[statMatrix.get(0).size()];
         double[][] sampleX = new double[statMatrix.get(0).size()][REGRESSION_DEGREE];
@@ -81,14 +93,16 @@ public class DerivSystemV2 implements DerivnFunction {
         double[] coeffsOfPoly = regression.estimateRegressionParameters();
         coeffsOfPoly = PolyUtils.truncPolyCoeffsDigits(coeffsOfPoly);
         Map<String, Double> regressionStatParams = collectRegressionStatParams(regression);
+        this.parameterPolynomialList.add(new ParameterPolynomial(columnNumber, coeffsOfPoly, isPositiveSide));
         this.rowColumnToRegressionModelCache.add(new RowColumnToRegressionModel(new Pair<>(rowNumber, columnNumber), coeffsOfPoly, regressionStatParams));
         return calcPoly(coeffsOfPoly, usedValue);
     }
 
-    private double buildAndSaveExternalFactor(int j, double t) {
+    private double buildAndSaveExternalFactor(int j, double t, boolean isPositiveSide) {
         SimpleRegression simpleRegression = new SimpleRegression();
         simpleRegression.addData(0, statMatrix.get(j).get(0));
         simpleRegression.addData(1, statMatrix.get(j).get(statMatrix.get(j).size() - 1));
+        this.externalFactorPolynomialList.add(new ExternalFactorPolynomial(j, simpleRegression.getSlope(), simpleRegression.getIntercept(), isPositiveSide));
         return simpleRegression.predict(t);
     }
 
@@ -128,12 +142,11 @@ public class DerivSystemV2 implements DerivnFunction {
 
     private double calculateExternalFactorsSum(int rowNumber, double t, boolean isPositiveSide) {
         double resultSum = 1;
-        //strange indexes, but now it's loose coupled to sizes of matrix
         for (int j = this.posNegMatrix.size(); j < this.posNegMatrix.get(0).size(); j++) {
             if ((posNegMatrix.get(rowNumber).get(j) == 1) && isPositiveSide) {
-                resultSum += buildAndSaveExternalFactor(j, t);
+                resultSum += buildAndSaveExternalFactor(j, t, true);
             } else if ((posNegMatrix.get(rowNumber).get(j) == -1) && !isPositiveSide) {
-                resultSum += buildAndSaveExternalFactor(j, t);
+                resultSum += buildAndSaveExternalFactor(j, t, false);
             }
         }
         return resultSum;

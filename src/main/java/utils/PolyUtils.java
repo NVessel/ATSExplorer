@@ -5,6 +5,12 @@ import java.math.RoundingMode;
 
 public class PolyUtils {
 
+    public static double truncPolyCoeffDigits(double coef) {
+        return BigDecimal.valueOf(coef)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
     public static double[] truncPolyCoeffsDigits(double[] coeffs) {
         double[] result = new double[coeffs.length];
         for (int i = 0; i < coeffs.length; i++) {
