@@ -26,7 +26,7 @@ public class DerivSystemV2 implements DerivnFunction {
 
     private final Logger logger = Logger.getLogger(DerivSystemV2.class.getName());
 
-    private static final int REGRESSION_DEGREE = 4;
+    private static final int REGRESSION_DEGREE = 1;
 
     private static final int GRAPH_WIDTH = 10;
     private static final int GRAPH_LENGTH = 20;
@@ -85,9 +85,9 @@ public class DerivSystemV2 implements DerivnFunction {
         for (int k = 0; k < statMatrix.get(0).size(); k++) {
             sampleY[k] = statMatrix.get(rowNumber).get(k);
             sampleX[k][0] = statMatrix.get(columnNumber).get(k);
-            sampleX[k][1] = Math.pow(statMatrix.get(columnNumber).get(k), 2);
-            sampleX[k][2] = Math.pow(statMatrix.get(columnNumber).get(k), 3);
-            sampleX[k][3] = Math.pow(statMatrix.get(columnNumber).get(k), 4);
+    //        sampleX[k][1] = Math.pow(statMatrix.get(columnNumber).get(k), 2);
+         //   sampleX[k][2] = Math.pow(statMatrix.get(columnNumber).get(k), 3);
+         //   sampleX[k][3] = Math.pow(statMatrix.get(columnNumber).get(k), 4);
             regression.newSampleData(sampleY, sampleX);
         }
         double[] coeffsOfPoly = regression.estimateRegressionParameters();

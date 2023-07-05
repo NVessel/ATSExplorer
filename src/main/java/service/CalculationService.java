@@ -21,9 +21,9 @@ import java.util.List;
 public class CalculationService {
 
     //rewrite hardcode and only one const to remain
-    private static final int ITERATIONS_COUNT = 10;
+    private static final int ITERATIONS_COUNT = 12;
     private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
-            "0.5", "0.6", "0.7", "0.8", "0.9", "1"};
+            "0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2"};
 
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
 
@@ -44,7 +44,7 @@ public class CalculationService {
         DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix, parametersNames);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
             yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
-            yn = correctEvaluations(yn, j, statisticsMatrix);
+         //   yn = correctEvaluations(yn, j, statisticsMatrix);
             for (int i = 0; i < posNegMatrix.size(); i++) {
                 ynParts[i][j] = yn[i];
             }

@@ -111,6 +111,7 @@ public class EnteringController implements Initializable {
             CalculationService calculationService = new CalculationService();
             try {
                 calculationService.calculateOnStatistics();
+                logger.log(Level.INFO, "Calculation is completed!");
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Something was wrong in calculation", e);
             }
