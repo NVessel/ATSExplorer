@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class LatexFileBuilder {
 
-    private List<ParameterToDependencies> parameterEquationInformation;
+    private List<ParameterToDependencies> parametersEquationInformation;
 
     @SneakyThrows
     public void writeSystemToLatex() {
@@ -26,7 +26,7 @@ public class LatexFileBuilder {
             fileWriter.write("\\begin{document}\n");
             fileWriter.write("\\begin{equation*}\n");
             fileWriter.write("\\begin{cases}\n");
-            for (ParameterToDependencies parameterToDependencies : parameterEquationInformation) {
+            for (ParameterToDependencies parameterToDependencies : parametersEquationInformation) {
                 fileWriter.write(buildParameterRow(parameterToDependencies));
                 fileWriter.write("\\\\");
             }
@@ -38,50 +38,38 @@ public class LatexFileBuilder {
 
     private String buildParameterRow(ParameterToDependencies parameterToDependencies) {
         StringBuilder res = new StringBuilder();
-        int elementCounter = 0;
-        res.append("\\frac{X_{").append(parameterToDependencies.getParameterIndex() + 1).append("}(t)}{dt} = (");
-        for (int i = 0; i < parameterToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive()) {
-                res.append(buildExternalFactorString(PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
-                        PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
-                elementCounter++;
-            }
-        }
-        //case when only one external factor or none - useless parenthesis is not needed
-        if (elementCounter < 2) {
-            res = new StringBuilder(res.substring(0, res.lastIndexOf("(")) + res.substring(res.lastIndexOf("(") + 1));
-        } else {
-            res.append(")");
-        }
-        for (int i = 0; i < parameterToDependencies.getPolynomialDependencies().size(); i++) {
-            if (parameterToDependencies.getPolynomialDependencies().get(i).isPositive()) {
-                res.append("(").append(buildPolyString(parameterToDependencies.getPolynomialDependencies().get(i).getParameterIndex(),
-                        parameterToDependencies.getPolynomialDependencies().get(i).getPolyCoeffs())).append(")");
-            }
-        }
+        res.append("\\frac{X_{")
+                .append(parameterToDependencies.getParameterIndex() + 1)
+                .append("}(t)}{dt} = (");
+        res = buildPartOfParameterRow(parameterToDependencies, res, true);
         res.append("\\\\");
         res.append(" - (");
-        elementCounter = 0;
+        res = buildPartOfParameterRow(parameterToDependencies, res, false);
+        return res.toString();
+    }
+
+    private StringBuilder buildPartOfParameterRow(ParameterToDependencies parameterToDependencies, StringBuilder parameterRowToAddPart, boolean isCollectingPositive) {
+        int elementCounter = 0;
         for (int i = 0; i < parameterToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (!parameterToDependencies.getExternalFactorDependencies().get(i).isPositive()) {
-                res.append(buildExternalFactorString(PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
+            if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive() == isCollectingPositive) {
+                parameterRowToAddPart.append(buildExternalFactorString(PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
                         PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
                 elementCounter++;
             }
         }
-        //case when only one external factor or none - useless parenthesis is not needed
+        //case when only one external factor or none - useless parentheses is not needed
         if (elementCounter < 2) {
-            res = new StringBuilder(res.substring(0, res.lastIndexOf("(")) + res.substring(res.lastIndexOf("(") + 1));
+            parameterRowToAddPart = new StringBuilder(parameterRowToAddPart.substring(0, parameterRowToAddPart.lastIndexOf("(")) + parameterRowToAddPart.substring(parameterRowToAddPart.lastIndexOf("(") + 1));
         } else {
-            res.append(")");
+            parameterRowToAddPart.append(")");
         }
         for (int i = 0; i < parameterToDependencies.getPolynomialDependencies().size(); i++) {
-            if (!parameterToDependencies.getPolynomialDependencies().get(i).isPositive()) {
-                res.append("(").append(buildPolyString(parameterToDependencies.getPolynomialDependencies().get(i).getParameterIndex(),
+            if (parameterToDependencies.getPolynomialDependencies().get(i).isPositive() == isCollectingPositive) {
+                parameterRowToAddPart.append("(").append(buildPolyString(parameterToDependencies.getPolynomialDependencies().get(i).getParameterIndex(),
                         parameterToDependencies.getPolynomialDependencies().get(i).getPolyCoeffs())).append(")");
             }
         }
-        return res.toString();
+        return parameterRowToAddPart;
     }
 
     private String buildExternalFactorString(double slope, double intercept, int elementCounter) {
