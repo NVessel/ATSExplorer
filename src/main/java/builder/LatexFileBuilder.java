@@ -41,30 +41,30 @@ public class LatexFileBuilder {
         res.append("\\frac{X_{")
                 .append(parameterToDependencies.getParameterIndex() + 1)
                 .append("}(t)}{dt} = (");
-        res = buildPartOfParameterRow(parameterToDependencies, res, true);
+        res = buildSideOfParameterRow(parameterToDependencies, res, true);
         res.append("\\\\");
         res.append(" - (");
-        res = buildPartOfParameterRow(parameterToDependencies, res, false);
+        res = buildSideOfParameterRow(parameterToDependencies, res, false);
         return res.toString();
     }
 
-    private StringBuilder buildPartOfParameterRow(ParameterToDependencies parameterToDependencies, StringBuilder parameterRowToAddPart, boolean isCollectingPositive) {
+    private StringBuilder buildSideOfParameterRow(ParameterToDependencies parameterToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
         int elementCounter = 0;
         for (int i = 0; i < parameterToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive() == isCollectingPositive) {
+            if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive() == isPositiveSideNeeded) {
                 parameterRowToAddPart.append(buildExternalFactorString(PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
                         PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
                 elementCounter++;
             }
         }
-        //case when only one external factor or none - useless parentheses is not needed
+        //case when only one external factor or none – useless parentheses is not needed
         if (elementCounter < 2) {
             parameterRowToAddPart = new StringBuilder(parameterRowToAddPart.substring(0, parameterRowToAddPart.lastIndexOf("(")) + parameterRowToAddPart.substring(parameterRowToAddPart.lastIndexOf("(") + 1));
         } else {
             parameterRowToAddPart.append(")");
         }
         for (int i = 0; i < parameterToDependencies.getPolynomialDependencies().size(); i++) {
-            if (parameterToDependencies.getPolynomialDependencies().get(i).isPositive() == isCollectingPositive) {
+            if (parameterToDependencies.getPolynomialDependencies().get(i).isPositive() == isPositiveSideNeeded) {
                 parameterRowToAddPart.append("(").append(buildPolyString(parameterToDependencies.getPolynomialDependencies().get(i).getParameterIndex(),
                         parameterToDependencies.getPolynomialDependencies().get(i).getPolyCoeffs())).append(")");
             }

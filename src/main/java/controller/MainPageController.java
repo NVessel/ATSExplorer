@@ -25,14 +25,11 @@ import suppliers.PosNegMatrixSupplier;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EnteringController implements Initializable {
+public class MainPageController implements Initializable {
 
         private final Logger logger = Logger.getLogger(DerivSystemV2.class.getName());
 
@@ -45,7 +42,7 @@ public class EnteringController implements Initializable {
         private AnchorPane left_scroll_anchor_pane;
 
         @FXML
-        private Pane right_pane;
+        private AnchorPane equationsAnchorPane;
 
         @FXML
         void calculateDerivs(ActionEvent event) throws IOException {
@@ -96,7 +93,7 @@ public class EnteringController implements Initializable {
                         x0 += 0.1;
                         xn += 0.1;
                 }
-                FXMLLoader fxmlLoader= new FXMLLoader(getClass().getResource("Untitled2.fxml"));
+                FXMLLoader fxmlLoader= new FXMLLoader(getClass().getResource("SolvingResultsPage.fxml"));
                 Parent load = fxmlLoader.load();
                 ResultController resultController = fxmlLoader.getController();
                 resultController.displayResults(ynParts);
@@ -119,21 +116,31 @@ public class EnteringController implements Initializable {
 
         @Override
         public void initialize(URL url, ResourceBundle resourceBundle) {
-                for (Node node: right_pane.getChildren()) {
-                        HBox hbox = (HBox) node;
-                        HBox leftHbox = (HBox) hbox.getChildren().get(0);
-                        ChoiceBox<Integer> choiceLeft = (ChoiceBox<Integer>) leftHbox.getChildren().get(1);
-                        ChoiceBox<Integer> choiceRight = (ChoiceBox<Integer>) leftHbox.getChildren().get(2);
-                        List<Integer> integers = new ArrayList<>();
-                        for (int i = 1; i < 16; i++) {
-                                integers.add(i);
-                        }
-                        choiceLeft.getItems().clear();
-                        choiceLeft.setItems(FXCollections.observableList(integers));
-                        choiceLeft.setValue(RANDOM.nextInt(14) + 1);
-                        choiceRight.getItems().clear();
-                        choiceRight.setItems(FXCollections.observableList(integers));
-                        choiceRight.setValue(RANDOM.nextInt(14) + 1);
-                }
+                /*for (Node node: equationsAnchorPane.getChildren()) {
+                    HBox hbox = (HBox) node;
+                    TextField polyNumberTextField = (TextField) hbox.getChildren().get(1);
+                    HBox leftHbox = (HBox) hbox.getChildren().get(1);
+                    ChoiceBox<Integer> choiceLeft = (ChoiceBox<Integer>) leftHbox.getChildren().get(1);
+                    ChoiceBox<Integer> choiceRight = (ChoiceBox<Integer>) leftHbox.getChildren().get(2);
+                    List<Integer> integers = new ArrayList<>();
+                    for (int i = 1; i < 16; i++) {
+                        integers.add(i);
+                    }
+                    choiceLeft.getItems().clear();
+                    choiceLeft.setItems(FXCollections.observableList(integers));
+                    choiceLeft.setValue(RANDOM.nextInt(14) + 1);
+                    choiceRight.getItems().clear();
+                    choiceRight.setItems(FXCollections.observableList(integers));
+                    choiceRight.setValue(RANDOM.nextInt(14) + 1);
+                }*/
+            ListIterator<Node> nodeListIterator = equationsAnchorPane.getChildren().listIterator();
+            while (nodeListIterator.hasNext()) {
+                initializeEquationRow(nodeListIterator.next(), nodeListIterator.nextIndex());
+            }
         }
+
+    private void initializeEquationRow(Node equationNode, int equationIndex) {
+        HBox equationHBox = (HBox) equationNode;
+        TextField polyNumberTextField = (TextField) equationHBox.getChildren().get(1);
+    }
 }
