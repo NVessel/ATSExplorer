@@ -38,7 +38,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
@@ -48,24 +47,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="629.0" prefWidth="1182.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainPageController">
+<VBox fx:id="mainPageRootVBox" prefHeight="629.0" prefWidth="1182.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainPageController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
-        <Menu mnemonicParsing="false" text="Файл">
+        <Menu mnemonicParsing="false" text="Действия">
           <items>
-            <MenuItem mnemonicParsing="false" text="Загрузить файл матрицы" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
+            <MenuItem mnemonicParsing="false" onAction="#loadMatrixFile" text="Загрузить файл матрицы" />
+            <MenuItem mnemonicParsing="false" onAction="#loadStatisticFile" text="Загрузить файл статистики" />
+            <MenuItem mnemonicParsing="false" onAction="#closeApplication" text="Выйти" />
           </items>
         </Menu>
       </menus>
@@ -85,7 +75,7 @@
                                           <HBox layoutX="7.0" layoutY="17.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Среднее число авиационных катастроф (X1)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -95,7 +85,7 @@
                                           <HBox layoutX="5.0" layoutY="44.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="422.0" text="Доля воздушных судов старше 15 лет (X2)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -105,7 +95,7 @@
                                           <HBox layoutX="5.0" layoutY="71.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="423.0" text="Средне количество ошибок пилотов (X3)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -115,7 +105,7 @@
                                           <HBox layoutX="8.0" layoutY="98.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Количество проданных авиабилетов (X4)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -125,7 +115,7 @@
                                           <HBox layoutX="8.0" layoutY="125.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Влияние человеческого фактора ( X5)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -135,7 +125,7 @@
                                           <HBox layoutX="6.0" layoutY="152.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="421.0" text="Влияние технического фактора ( X6)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -145,7 +135,7 @@
                                           <HBox layoutX="7.0" layoutY="178.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="421.0" text="Среднее время тренировок на тренажерах (X7)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -155,7 +145,7 @@
                                           <HBox layoutX="5.0" layoutY="205.0" prefHeight="26.0" prefWidth="506.0">
                                              <children>
                                                 <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="424.0" text="Показатель активности за оборотом контрафакта (X8)" />
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -175,7 +165,7 @@
                                                       <Insets />
                                                    </HBox.margin>
                                                 </Label>
-                                                <TextField prefHeight="26.0" prefWidth="70.0">
+                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
                                                    <HBox.margin>
                                                       <Insets left="5.0" />
                                                    </HBox.margin>
@@ -589,12 +579,15 @@
                                        </children></AnchorPane>
                                 </content>
                               </TitledPane>
-                              <TitledPane animated="false" layoutX="559.0" layoutY="329.0" prefHeight="212.0" prefWidth="611.0" text="Управление">
+                              <TitledPane animated="false" layoutX="559.0" layoutY="320.0" prefHeight="221.0" prefWidth="611.0" text="Управление">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="191.0" prefWidth="536.0">
                                        <children>
-                                          <Button layoutX="114.0" layoutY="33.0" mnemonicParsing="false" text="Решить систему уравнений со случайными значениями" />
-                                          <Button layoutX="125.0" layoutY="82.0" mnemonicParsing="false" text="Решить систему уравнений на основе статистики" />
+                                          <Button layoutX="113.0" layoutY="14.0" mnemonicParsing="false" text="Решить систему уравнений со случайными значениями" />
+                                          <Button fx:id="statisticsCalculationButton" layoutX="130.0" layoutY="49.0" mnemonicParsing="false" onAction="#calculateOnStatistics" text="Решить систему уравнений на основе статистики" />
+                                          <Button layoutX="119.0" layoutY="86.0" mnemonicParsing="false" onAction="#showSolutionResults" text="Отобразить результаты решения системы уравнений" />
+                                          <Button layoutX="108.0" layoutY="123.0" mnemonicParsing="false" onAction="#showDependenciesGraphs" text="Отобразить графики зависимостей параметров системы" />
+                                          <Button layoutX="122.0" layoutY="161.0" mnemonicParsing="false" onAction="#showDifferentialEquationsSystem" text="Отобразить систему дифференциальных уравнений" />
                                        </children>
                                     </AnchorPane>
                                 </content>

@@ -2,6 +2,8 @@ package service;
 
 import deriv.DerivSystemV2;
 import flanagan.integration.RungeKutta;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -10,42 +12,44 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
-import suppliers.PosNegMatrixSupplier;
+import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.StatisticsSupplier;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
+@NoArgsConstructor
+@Setter
 public class CalculationService {
 
     //rewrite hardcode and only one const to remain
     private static final int ITERATIONS_COUNT = 12;
     private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
             "0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2"};
-
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
-
     private static final int GRAPHS_FIRST_ROW = 15;
     private static final int GRAPH_LENGTH = 29;
 
-    public void calculateOnStatistics() throws URISyntaxException, IOException, InvalidFormatException {
-        List<List<Integer>> posNegMatrix = PosNegMatrixSupplier.getExternalMatrix();
-        List<List<Double>> statisticsMatrix = StatisticsSupplier.getExternalStatistics();
-        List<String> parametersNames = PosNegMatrixSupplier.getParametersNames();
-        double[] y0 = extractInitialValues(statisticsMatrix, posNegMatrix.size());
+    private ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier;
+    private StatisticsSupplier statisticsSupplier;
+
+    public void calculateOnStatistics() throws IOException, InvalidFormatException {
+        List<List<Integer>> dependenciesMatrix = parametersDependenciesMatrixSupplier.getExternalMatrix();
+        List<List<Double>> statisticsMatrix = statisticsSupplier.getExternalStatistics();
+        List<String> parametersNames = parametersDependenciesMatrixSupplier.getParametersNames();
+        double[] y0 = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
         double[] y0copy = y0;
         double h = 0.01;
         double x0 = 0.0D;
         double xn = 0.1D;
         double[] yn;
-        double[][] ynParts = new double[posNegMatrix.size()][ITERATIONS_COUNT];
-        DerivSystemV2 systemDeriv = new DerivSystemV2(posNegMatrix, statisticsMatrix, parametersNames);
+        double[][] ynParts = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
+        DerivSystemV2 systemDeriv = new DerivSystemV2(dependenciesMatrix, statisticsMatrix, parametersNames);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
             yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
          //   yn = correctEvaluations(yn, j, statisticsMatrix);
-            for (int i = 0; i < posNegMatrix.size(); i++) {
+            for (int i = 0; i < dependenciesMatrix.size(); i++) {
                 ynParts[i][j] = yn[i];
             }
             y0 = yn;

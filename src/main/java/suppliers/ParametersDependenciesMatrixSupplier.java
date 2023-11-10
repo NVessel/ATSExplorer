@@ -1,5 +1,6 @@
 package suppliers;
 
+import lombok.AllArgsConstructor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -9,14 +10,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PosNegMatrixSupplier {
+@AllArgsConstructor
+public class ParametersDependenciesMatrixSupplier {
 
     private static final String STRING_FOR_SEEK = "X";
+
+    private final File matrixFile;
 
     public static int[][] getMatrix() {
         int[][] mas = new int[15][15];
@@ -114,13 +116,10 @@ public class PosNegMatrixSupplier {
         return mas;
     }
 
-    public static List<List<Integer>> getExternalMatrix() throws URISyntaxException, IOException, InvalidFormatException {
-        URL url = PosNegMatrixSupplier.class.getResource("/excel/new Max matrix.xlsx");
-        assert url != null;
-        File resourceFile = new File(url.toURI());
-        XSSFWorkbook matrixWorkbook = new XSSFWorkbook(resourceFile);
+    public List<List<Integer>> getExternalMatrix() throws IOException, InvalidFormatException {
+        XSSFWorkbook matrixWorkbook = new XSSFWorkbook(matrixFile);
         XSSFSheet firstSheet = matrixWorkbook.getSheetAt(0);
-        List<List<Integer>> result = new ArrayList<>();
+        List<List<Integer>> matrix = new ArrayList<>();
         for (Row row: firstSheet) {
             List<Integer> rowCells = new ArrayList<>();
             for (Cell cell: row) {
@@ -130,18 +129,15 @@ public class PosNegMatrixSupplier {
                 }
             }
             if (!rowCells.isEmpty()) {
-                result.add(rowCells);
+                matrix.add(rowCells);
             }
         }
         matrixWorkbook.close();
-        return result;
+        return matrix;
     }
 
-    public static List<String> getParametersNames() throws URISyntaxException, IOException, InvalidFormatException {
-        URL url = PosNegMatrixSupplier.class.getResource("/excel/new Max matrix.xlsx");
-        assert url != null;
-        File resourceFile = new File(url.toURI());
-        XSSFWorkbook matrixWorkbook = new XSSFWorkbook(resourceFile);
+    public List<String> getParametersNames() throws IOException, InvalidFormatException {
+        XSSFWorkbook matrixWorkbook = new XSSFWorkbook(matrixFile);
         XSSFSheet firstSheet = matrixWorkbook.getSheetAt(0);
         List<String> names = new ArrayList<>();
         for (Row row: firstSheet) {

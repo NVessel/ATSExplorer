@@ -5,13 +5,13 @@ import java.math.RoundingMode;
 
 public class PolyUtils {
 
-    public static double truncPolyCoeffDigits(double coef) {
+    public static double trunkPolyCoefficientDigits(double coef) {
         return BigDecimal.valueOf(coef)
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
-    public static double[] truncPolyCoeffsDigits(double[] coeffs) {
+    public static double[] trunkPolyCoefficientsDigits(double[] coeffs) {
         double[] result = new double[coeffs.length];
         for (int i = 0; i < coeffs.length; i++) {
             result[i] = BigDecimal.valueOf(coeffs[i])
@@ -21,7 +21,7 @@ public class PolyUtils {
         return result;
     }
 
-    public static double[] truncPolyCoeffsDigits(double[] coeffs, int digitCount) {
+    public static double[] trunkPolyCoefficientsDigits(double[] coeffs, int digitCount) {
         double[] result = new double[coeffs.length];
         for (int i = 0; i < coeffs.length; i++) {
             result[i] = BigDecimal.valueOf(coeffs[i])

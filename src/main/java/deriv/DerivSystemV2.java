@@ -1,7 +1,8 @@
 package deriv;
 
-import builder.LatexFileBuilder;
+import builder.DifferentialSystemWriter;
 import flanagan.integration.DerivnFunction;
+import lombok.extern.java.Log;
 import model.ExternalFactorPolynomial;
 import model.ParameterPolynomial;
 import model.ParameterToDependencies;
@@ -20,11 +21,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Log
 public class DerivSystemV2 implements DerivnFunction {
-
-    private final Logger logger = Logger.getLogger(DerivSystemV2.class.getName());
 
     private static final int REGRESSION_DEGREE = 1;
 
@@ -70,8 +69,9 @@ public class DerivSystemV2 implements DerivnFunction {
         if (IS_ENABLED_POLY_DRAWING) {
             showPolys();
         }
-        LatexFileBuilder latexFileBuilder = new LatexFileBuilder(parameterToDependenciesCache);
-        latexFileBuilder.writeSystemToLatex();
+        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(parameterToDependenciesCache);
+        differentialSystemWriter.writeSystemToLatex();
+        differentialSystemWriter.writeSystemToPdf();
         parameterToDependenciesCache.clear();
         rowColumnToRegressionModelCache.clear();
         return dxdt;
@@ -91,7 +91,7 @@ public class DerivSystemV2 implements DerivnFunction {
             regression.newSampleData(sampleY, sampleX);
         }
         double[] coeffsOfPoly = regression.estimateRegressionParameters();
-        coeffsOfPoly = PolyUtils.truncPolyCoeffsDigits(coeffsOfPoly);
+        coeffsOfPoly = PolyUtils.trunkPolyCoefficientsDigits(coeffsOfPoly);
         Map<String, Double> regressionStatParams = collectRegressionStatParams(regression);
         this.parameterPolynomialList.add(new ParameterPolynomial(columnNumber, coeffsOfPoly, isPositiveSide));
         this.rowColumnToRegressionModelCache.add(new RowColumnToRegressionModel(new Pair<>(rowNumber, columnNumber), coeffsOfPoly, regressionStatParams));
@@ -167,8 +167,7 @@ public class DerivSystemV2 implements DerivnFunction {
             resultBook.write(fileOutputStream);
             resultBook.close();
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "resultPolyBook file is broken");
-            e.printStackTrace();
+            log.log(Level.SEVERE, "resultPolyBook file is broken", e);
         }
     }
 

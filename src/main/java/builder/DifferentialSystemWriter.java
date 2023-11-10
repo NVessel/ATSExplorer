@@ -2,22 +2,28 @@ package builder;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import model.ParameterToDependencies;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import utils.PolyUtils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
 
+@Log
 @AllArgsConstructor
-public class LatexFileBuilder {
+public class DifferentialSystemWriter {
+
+    private static final String TEX_FILENAME = "equationSystem.tex";
 
     private List<ParameterToDependencies> parametersEquationInformation;
 
     @SneakyThrows
     public void writeSystemToLatex() {
-        File latexFile = new File("equationSystem.tex");
+        File latexFile = new File(TEX_FILENAME);
         try (FileWriter fileWriter = new FileWriter(latexFile)) {
             fileWriter.write("\\documentclass[12pt, letterpaper]{article}\n");
             fileWriter.write("\\usepackage{amsmath}\n");
@@ -33,6 +39,26 @@ public class LatexFileBuilder {
             fileWriter.write("\\end{cases}\n");
             fileWriter.write("\\end{equation*}\n");
             fileWriter.write("\\end{document}");
+        }
+    }
+
+    public void writeSystemToPdf() {
+        File latexFile = new File(TEX_FILENAME);
+        if (latexFile.exists()) {
+            startPdfCreationProcess();
+        } else {
+            log.log(Level.WARNING, "Tex file wasn't found for pdf creation");
+        }
+    }
+
+    private static void startPdfCreationProcess() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("pdflatex", TEX_FILENAME);
+            processBuilder.directory(new File("."));
+            processBuilder.start();
+        } catch (IOException e) {
+            log.log(Level.SEVERE, "Can not run pdflatex tool", e);
         }
     }
 
@@ -52,8 +78,8 @@ public class LatexFileBuilder {
         int elementCounter = 0;
         for (int i = 0; i < parameterToDependencies.getExternalFactorDependencies().size(); i++) {
             if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append(buildExternalFactorString(PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
-                        PolyUtils.truncPolyCoeffDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
+                parameterRowToAddPart.append(buildExternalFactorString(PolyUtils.trunkPolyCoefficientDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
+                        PolyUtils.trunkPolyCoefficientDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
                 elementCounter++;
             }
         }
@@ -80,8 +106,8 @@ public class LatexFileBuilder {
         return "(" + polynomialFunction.toString().replace("x", "t") + ")";
     }
 
-    private String buildPolyString(int parameterNumber, double[] coeffs) {
-        PolynomialFunction polynomialFunction = new PolynomialFunction(coeffs);
+    private String buildPolyString(int parameterNumber, double[] coefficients) {
+        PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
         return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
     }
 }
