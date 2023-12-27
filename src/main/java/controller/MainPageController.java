@@ -1,16 +1,17 @@
 package controller;
 
+import builder.ViewComponentsBuilder;
 import deriv.DerivSystem;
 import flanagan.integration.RungeKutta;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -23,35 +24,34 @@ import service.ResultsDemonstrationService;
 import suppliers.CoefMatrixSupplier;
 import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.StatisticsSupplier;
-import utils.PolyUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Random;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 @Log
-public class MainPageController implements Initializable {
+public class MainPageController {
 
-    private static final int EQUATION_HBOX_POLY_NUMBER_FIELD_ORDER = 1;
-    private static final List<Integer> EQUATION_HBOX_POLY_COEFFICIENTS_FIELDS_ORDERS = List.of(3, 5, 7, 9);
-
+    private static final int EQUATIONS_MIN_QUANTITY = 2;
     @FXML
     private VBox mainPageRootVBox;
+    @FXML
+    private VBox initialConditionsVBox;
+    @FXML
+    private VBox externalFactorsVBox;
     @FXML
     private AnchorPane left_scroll_anchor_pane;
     @FXML
     private AnchorPane equationsAnchorPane;
+    @FXML
+    private VBox equationsVBox;
 
     private final ResultsDemonstrationService resultsDemonstrationService = new ResultsDemonstrationService();
     private final CalculationService calculationService = new CalculationService();
+    private final ViewComponentsBuilder viewComponentsBuilder = new ViewComponentsBuilder();
 
     @FXML
-    void calculateDerivs(ActionEvent event) throws IOException {
+    private void calculateDerivs(ActionEvent event) throws IOException {
         int[][] cons = ParametersDependenciesMatrixSupplier.getMatrix();
         String[][] coefs = CoefMatrixSupplier.getMatrix();
         double[] y0 = new double[15];
@@ -110,7 +110,7 @@ public class MainPageController implements Initializable {
     }
 
     @FXML
-    void calculateOnStatistics() {
+    private void calculateOnStatistics() {
         try {
             calculationService.calculateOnStatistics();
             log.log(Level.INFO, "Calculation is completed!");
@@ -120,11 +120,14 @@ public class MainPageController implements Initializable {
     }
 
     @FXML
-    void loadMatrixFile() {
+    private void loadMatrixFileAndRewriteSystemElements() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("excelFilter", "*.xlsx"));
         File matrixFile = fileChooser.showOpenDialog(mainPageRootVBox.getScene().getWindow());
-        this.calculationService.setParametersDependenciesMatrixSupplier(new ParametersDependenciesMatrixSupplier(matrixFile));
+        ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier = new ParametersDependenciesMatrixSupplier(matrixFile);
+        this.redrawInitialConditions(parametersDependenciesMatrixSupplier);
+        this.redrawExternalFactors(parametersDependenciesMatrixSupplier);
+        this.calculationService.setParametersDependenciesMatrixSupplier(parametersDependenciesMatrixSupplier);
     }
 
     @FXML
@@ -136,47 +139,52 @@ public class MainPageController implements Initializable {
     }
 
     @FXML
-    void showSolutionResults() {
+    private void addAnotherPolynomial() {
+        equationsVBox.getChildren().add(new Separator());
+        equationsVBox.getChildren().add(viewComponentsBuilder.buildAnotherPolynomialHBox());
+    }
+
+    @FXML
+    private void deleteAnotherPolynomial() {
+        if (equationsVBox.getChildren().size() > EQUATIONS_MIN_QUANTITY) {
+            //two times because of separator
+            for (int i = 0; i < 2; i++) {
+                equationsVBox.getChildren().remove(equationsVBox.getChildren().size() - 1);
+            }
+        }
+    }
+
+    @FXML
+    private void showSolutionResults() {
         this.resultsDemonstrationService.showSolutionResults();
     }
 
     @FXML
-    void showDependenciesGraphs() {
+    private void showDependenciesGraphs() {
         this.resultsDemonstrationService.showDependenciesGraphsResults();
     }
 
     @FXML
-    void showDifferentialEquationsSystem() {
+    private void showDifferentialEquationsSystem() {
         this.resultsDemonstrationService.showDifferentialEquationsSystemResults();
     }
 
     @FXML
-    void closeApplication() {
+    private void closeApplication() {
         System.exit(0);
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        ListIterator<Node> nodeListIterator = equationsAnchorPane.getChildren().listIterator();
-        while (nodeListIterator.hasNext()) {
-            initializeEquationRow(nodeListIterator.next(), nodeListIterator.nextIndex());
+    private void redrawInitialConditions(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier) {
+        initialConditionsVBox.getChildren().clear();
+        for (String parameterName : parametersDependenciesMatrixSupplier.getParametersNames()) {
+            initialConditionsVBox.getChildren().add(viewComponentsBuilder.buildInitialConditionHBox(parameterName));
         }
     }
 
-    private void initializeEquationRow(Node equationNode, int equationIndex) {
-        HBox equationHBox = (HBox) equationNode;
-        TextField polyNumberTextField = (TextField) equationHBox.getChildren().get(EQUATION_HBOX_POLY_NUMBER_FIELD_ORDER);
-        polyNumberTextField.setText(String.valueOf(equationIndex));
-        for (Integer polyCoefficientsFieldsOrder : EQUATION_HBOX_POLY_COEFFICIENTS_FIELDS_ORDERS) {
-            initializePolyCoefficientPart(equationHBox, polyCoefficientsFieldsOrder);
+    private void redrawExternalFactors(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier) {
+        externalFactorsVBox.getChildren().clear();
+        for (String externalFactorName : parametersDependenciesMatrixSupplier.getExternalFactorsNames()) {
+            externalFactorsVBox.getChildren().add(viewComponentsBuilder.buildExternalFactorHBox(externalFactorName));
         }
-    }
-
-    private void initializePolyCoefficientPart(HBox equationHBox, Integer polyCoefficientsFieldsOrder) {
-        TextField polyCoefficientTextField = (TextField) equationHBox.getChildren().get(polyCoefficientsFieldsOrder);
-        Random valuesRandomizer = new Random();
-        polyCoefficientTextField.setText(String.valueOf(
-                PolyUtils.trunkPolyCoefficientDigits(valuesRandomizer.nextDouble())
-        ));
     }
 }

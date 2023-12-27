@@ -1,6 +1,6 @@
 package deriv;
 
-import builder.DifferentialSystemWriter;
+import service.DifferentialSystemWriter;
 import flanagan.integration.DerivnFunction;
 import lombok.extern.java.Log;
 import model.ExternalFactorPolynomial;

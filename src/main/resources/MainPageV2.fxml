@@ -38,10 +38,12 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -53,7 +55,7 @@
       <menus>
         <Menu mnemonicParsing="false" text="Действия">
           <items>
-            <MenuItem mnemonicParsing="false" onAction="#loadMatrixFile" text="Загрузить файл матрицы" />
+            <MenuItem mnemonicParsing="false" onAction="#loadMatrixFileAndRewriteSystemElements" text="Загрузить файл матрицы" />
             <MenuItem mnemonicParsing="false" onAction="#loadStatisticFile" text="Загрузить файл статистики" />
             <MenuItem mnemonicParsing="false" onAction="#closeApplication" text="Выйти" />
           </items>
@@ -72,518 +74,16 @@
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="266.0">
                                        <children>
-                                          <HBox layoutX="7.0" layoutY="17.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Среднее число авиационных катастроф (X1)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="5.0" layoutY="44.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="422.0" text="Доля воздушных судов старше 15 лет (X2)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="5.0" layoutY="71.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="423.0" text="Средне количество ошибок пилотов (X3)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="8.0" layoutY="98.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Количество проданных авиабилетов (X4)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="8.0" layoutY="125.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="420.0" text="Влияние человеческого фактора ( X5)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="6.0" layoutY="152.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="421.0" text="Влияние технического фактора ( X6)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="7.0" layoutY="178.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="421.0" text="Среднее время тренировок на тренажерах (X7)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="5.0" layoutY="205.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="424.0" text="Показатель активности за оборотом контрафакта (X8)" />
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="6.0" layoutY="237.0" prefHeight="26.0" prefWidth="506.0">
-                                             <children>
-                                                <Label alignment="CENTER_RIGHT" prefHeight="18.0" prefWidth="423.0" text="Повторяемость происшествий (X9)">
-                                                   <font>
-                                                      <Font size="14.0" />
-                                                   </font>
-                                                   <opaqueInsets>
-                                                      <Insets />
-                                                   </opaqueInsets>
-                                                   <HBox.margin>
-                                                      <Insets />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="70.0" text="0">
-                                                   <HBox.margin>
-                                                      <Insets left="5.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
+                                          <VBox fx:id="initialConditionsVBox" prefHeight="501.0" prefWidth="539.0" />
                                        </children>
                                     </AnchorPane>
-                                </content>
-                              </TitledPane>
-                              <TitledPane animated="false" layoutX="563.0" layoutY="12.0" prefHeight="297.0" prefWidth="607.0" text="Уравнения">
-                                <content>
-                                  <AnchorPane fx:id="equationsAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="270.0" prefWidth="540.0">
-                                       <children>
-                                          <HBox layoutX="28.0" layoutY="21.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="29.0" layoutY="58.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="28.0" layoutY="96.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="28.0" layoutY="135.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="28.0" layoutY="176.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                          <HBox layoutX="29.0" layoutY="215.0" prefHeight="26.0" prefWidth="559.0">
-                                             <children>
-                                                <Label text="F">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="60.0">
-                                                   <HBox.margin>
-                                                      <Insets left="3.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="(t) =">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^3 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x^2 +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                                <Label text="x +">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </Label>
-                                                <TextField prefHeight="26.0" prefWidth="66.0">
-                                                   <HBox.margin>
-                                                      <Insets left="2.0" />
-                                                   </HBox.margin>
-                                                </TextField>
-                                             </children>
-                                          </HBox>
-                                       </children></AnchorPane>
                                 </content>
                               </TitledPane>
                               <TitledPane animated="false" layoutX="559.0" layoutY="320.0" prefHeight="221.0" prefWidth="611.0" text="Управление">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="191.0" prefWidth="536.0">
                                        <children>
-                                          <Button layoutX="113.0" layoutY="14.0" mnemonicParsing="false" text="Решить систему уравнений со случайными значениями" />
+                                          <Button layoutX="136.0" layoutY="14.0" mnemonicParsing="false" text="Решить систему уравнений в тестовом режиме" />
                                           <Button fx:id="statisticsCalculationButton" layoutX="130.0" layoutY="49.0" mnemonicParsing="false" onAction="#calculateOnStatistics" text="Решить систему уравнений на основе статистики" />
                                           <Button layoutX="119.0" layoutY="86.0" mnemonicParsing="false" onAction="#showSolutionResults" text="Отобразить результаты решения системы уравнений" />
                                           <Button layoutX="108.0" layoutY="123.0" mnemonicParsing="false" onAction="#showDependenciesGraphs" text="Отобразить графики зависимостей параметров системы" />
@@ -592,15 +92,139 @@
                                     </AnchorPane>
                                 </content>
                               </TitledPane>
+                              <ScrollPane layoutX="562.0" layoutY="14.0" prefHeight="217.0" prefWidth="605.0">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="298.0" prefWidth="607.0">
+                                       <children>
+                                          <TitledPane animated="false" prefHeight="297.0" prefWidth="607.0" text="Уравнения">
+                                            <content>
+                                              <AnchorPane fx:id="equationsAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="270.0" prefWidth="605.0">
+                                                   <children>
+                                                      <VBox fx:id="equationsVBox" prefHeight="273.0" prefWidth="585.0">
+                                                         <children>
+                                                            <ToolBar prefHeight="40.0" prefWidth="200.0">
+                                                              <items>
+                                                                  <Button mnemonicParsing="false" onAction="#addAnotherPolynomial" text="Добавить" />
+                                                                <Button mnemonicParsing="false" onAction="#deleteAnotherPolynomial" text="Убрать" />
+                                                              </items>
+                                                               <VBox.margin>
+                                                                  <Insets bottom="10.0" />
+                                                               </VBox.margin>
+                                                            </ToolBar>
+                                                            <HBox prefHeight="26.0" prefWidth="559.0">
+                                                               <children>
+                                                                  <Label text="f">
+                                                                     <font>
+                                                                        <Font size="18.0" />
+                                                                     </font>
+                                                                     <HBox.margin>
+                                                                        <Insets left="2.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="60.0" text="1">
+                                                                     <HBox.margin>
+                                                                        <Insets left="3.0" />
+                                                                     </HBox.margin>
+                                                                     <font>
+                                                                        <Font size="14.0" />
+                                                                     </font>
+                                                                  </TextField>
+                                                                  <Label text="(t) =">
+                                                                     <font>
+                                                                        <Font size="18.0" />
+                                                                     </font>
+                                                                     <HBox.margin>
+                                                                        <Insets left="2.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="60.0" text="1">
+                                                                     <HBox.margin>
+                                                                        <Insets left="3.0" />
+                                                                     </HBox.margin>
+                                                                     <font>
+                                                                        <Font size="14.0" />
+                                                                     </font>
+                                                                  </TextField>
+                                                                  <Label text="x^3 +">
+                                                                     <font>
+                                                                        <Font size="18.0" />
+                                                                     </font>
+                                                                     <HBox.margin>
+                                                                        <Insets left="2.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="60.0" text="1">
+                                                                     <HBox.margin>
+                                                                        <Insets left="3.0" />
+                                                                     </HBox.margin>
+                                                                     <font>
+                                                                        <Font size="14.0" />
+                                                                     </font>
+                                                                  </TextField>
+                                                                  <Label text="x^2 +">
+                                                                     <font>
+                                                                        <Font size="18.0" />
+                                                                     </font>
+                                                                     <HBox.margin>
+                                                                        <Insets left="2.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="60.0" text="1">
+                                                                     <HBox.margin>
+                                                                        <Insets left="3.0" />
+                                                                     </HBox.margin>
+                                                                     <font>
+                                                                        <Font size="14.0" />
+                                                                     </font>
+                                                                  </TextField>
+                                                                  <Label text="x +">
+                                                                     <font>
+                                                                        <Font size="18.0" />
+                                                                     </font>
+                                                                     <HBox.margin>
+                                                                        <Insets left="2.0" />
+                                                                     </HBox.margin>
+                                                                  </Label>
+                                                                  <TextField alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="60.0" text="0">
+                                                                     <HBox.margin>
+                                                                        <Insets left="3.0" />
+                                                                     </HBox.margin>
+                                                                     <font>
+                                                                        <Font size="14.0" />
+                                                                     </font>
+                                                                  </TextField>
+                                                               </children>
+                                                               <VBox.margin>
+                                                                  <Insets bottom="5.0" />
+                                                               </VBox.margin>
+                                                            </HBox>
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                </AnchorPane>
+                                            </content>
+                                          </TitledPane>
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </ScrollPane>
                            </children>
                         </AnchorPane>
                   </content>
                 </Tab>
-                <Tab text="График внешних возмущений">
+                <Tab text="Внешние возмущения">
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <Label layoutX="290.0" layoutY="149.0" text="Не реализовано" />
+                              <TitledPane animated="false" layoutX="13.0" layoutY="13.0" prefHeight="527.0" prefWidth="1149.0" text="Уравнения">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <VBox fx:id="externalFactorsVBox" layoutY="-3.0" prefHeight="503.0" prefWidth="1146.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </TitledPane>
                            </children>
                         </AnchorPane>
                   </content>

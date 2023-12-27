@@ -1,4 +1,4 @@
-package builder;
+package service;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -63,15 +63,16 @@ public class DifferentialSystemWriter {
     }
 
     private String buildParameterRow(ParameterToDependencies parameterToDependencies) {
-        StringBuilder res = new StringBuilder();
-        res.append("\\frac{X_{")
+        StringBuilder parameterRow = new StringBuilder();
+        parameterRow.append("\\frac{X_{")
                 .append(parameterToDependencies.getParameterIndex() + 1)
                 .append("}(t)}{dt} = (");
-        res = buildSideOfParameterRow(parameterToDependencies, res, true);
-        res.append("\\\\");
-        res.append(" - (");
-        res = buildSideOfParameterRow(parameterToDependencies, res, false);
-        return res.toString();
+        parameterRow = buildSideOfParameterRow(parameterToDependencies, parameterRow, true);
+        parameterRow.append("\\\\");
+        parameterRow.append("\\quad");
+        parameterRow.append(" - (");
+        parameterRow = buildSideOfParameterRow(parameterToDependencies, parameterRow, false);
+        return parameterRow.toString();
     }
 
     private StringBuilder buildSideOfParameterRow(ParameterToDependencies parameterToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
