@@ -2,7 +2,6 @@ package builder;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -53,6 +52,7 @@ public class ViewComponentsBuilder {
     public HBox buildExternalFactorHBox(String externalFactorName) {
         HBox externalFactorHBox = new HBox(new Label(externalFactorName + "(t) ="), this.getFilledTextFieldForExternalFactorHBox(),
                 new Label("t^2 +"), this.getFilledTextFieldForExternalFactorHBox(), new Label("t +"), this.getFilledTextFieldForExternalFactorHBox());
+        externalFactorHBox.setAlignment(Pos.CENTER_LEFT);
         return externalFactorHBox;
     }
 
@@ -60,7 +60,7 @@ public class ViewComponentsBuilder {
         TextField textField = new TextField("1");
         textField.setAlignment(Pos.CENTER_RIGHT);
         textField.setPrefWidth(60);
-        HBox.setMargin(textField, new Insets(0, 0, 0, 3));
+        HBox.setMargin(textField, new Insets(0, 3, 0, 3));
         return textField;
     }
 }

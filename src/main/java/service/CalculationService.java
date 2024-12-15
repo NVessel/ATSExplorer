@@ -1,8 +1,7 @@
 package service;
 
-import deriv.DerivSystemV2;
+import deriv.DerivativeSystem;
 import flanagan.integration.RungeKutta;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,11 +18,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-@NoArgsConstructor
 @Setter
 public class CalculationService {
 
-    //rewrite hardcode and only one const to remain
     private static final int ITERATIONS_COUNT = 12;
     private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
             "0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2"};
@@ -45,7 +42,7 @@ public class CalculationService {
         double xn = 0.1D;
         double[] yn;
         double[][] ynParts = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
-        DerivSystemV2 systemDeriv = new DerivSystemV2(dependenciesMatrix, statisticsMatrix, parametersNames);
+        DerivativeSystem systemDeriv = new DerivativeSystem(dependenciesMatrix, statisticsMatrix, parametersNames);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
             yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
          //   yn = correctEvaluations(yn, j, statisticsMatrix);
