@@ -8,8 +8,8 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class RowColumnToRegressionModel {
-    private Pair<Integer, Integer> rowColumn;
+public class PolynomialDependency {
+    private Pair<Integer, Integer> derivativeParameterNumberToAffectingParameterNumber;
     private double[] polynomialCoefficients;
     private Map<String, Double> regressionMetrics;
 }

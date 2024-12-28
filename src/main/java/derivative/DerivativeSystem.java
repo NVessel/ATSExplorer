@@ -1,4 +1,4 @@
-package deriv;
+package derivative;
 
 import model.*;
 import service.DifferentialSystemWriter;
@@ -10,7 +10,7 @@ import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
-import utils.PolyUtils;
+import utils.PolynomialUtils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,13 +28,13 @@ public class DerivativeSystem implements DerivnFunction {
     private static final int GRAPH_LENGTH = 20;
     private static final boolean IS_ENABLED_POLY_DRAWING = true;
 
-    private List<ParameterPolynomial> parameterPolynomialList;
+    private List<AffectingParameterPolynomial> affectingParameterPolynomials;
     private List<ExternalFactorPolynomial> externalFactorPolynomialList;
     private final List<List<Integer>> dependencyMatrix;
     private final List<List<Double>> statisticMatrix;
     private final List<String> parametersNames;
-    private final List<RowColumnToRegressionModel> rowColumnToRegressionModelCache = new LinkedList<>();
-    private final List<ParameterToDependencies> parameterToDependenciesCache = new LinkedList<>();
+    private final List<PolynomialDependency> polynomialDependenciesCache = new LinkedList<>();
+    private final List<DerivativeParameterNumberWithDependencies> derivativeParameterNumberToDependenciesCache = new LinkedList<>();
 
     public DerivativeSystem(List<List<Integer>> dependencyMatrix, List<List<Double>> statisticMatrix, List<String> parametersNames) {
         this.dependencyMatrix = dependencyMatrix;
@@ -45,37 +45,45 @@ public class DerivativeSystem implements DerivnFunction {
     @Override
     public double[] derivn(double t, double[] x) {
         double[] dxdt = new double[this.dependencyMatrix.size()];
-        for (int derivatedParameterNumber = 0; derivatedParameterNumber < this.dependencyMatrix.size(); derivatedParameterNumber++) {
+        for (int derivativeParameterNumber = 0; derivativeParameterNumber < this.dependencyMatrix.size(); derivativeParameterNumber++) {
             double positiveSideOfParameterMultiplication = 1;
             double negativeSideOfParameterMultiplication = 1;
-            this.parameterPolynomialList = new ArrayList<>();
+            this.affectingParameterPolynomials = new ArrayList<>();
             this.externalFactorPolynomialList = new ArrayList<>();
             for (int affectingOnDerivatedParameterNumber = 0; affectingOnDerivatedParameterNumber < this.dependencyMatrix.size(); affectingOnDerivatedParameterNumber++) {
-                if (dependencyMatrix.get(derivatedParameterNumber).get(affectingOnDerivatedParameterNumber) == 1) {
-                    positiveSideOfParameterMultiplication *= createFunctionDependencyAndCalculatePartOfSideForDerivatedParameter(derivatedParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], true);
-                }
-                else if (dependencyMatrix.get(derivatedParameterNumber).get(affectingOnDerivatedParameterNumber) == -1) {
-                    negativeSideOfParameterMultiplication *= createFunctionDependencyAndCalculatePartOfSideForDerivatedParameter(derivatedParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], false);
+                if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivatedParameterNumber) == 1) {
+                    positiveSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], true);
+                } else if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivatedParameterNumber) == -1) {
+                    negativeSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], false);
                 }
             }
-            dxdt[derivatedParameterNumber] = calculateExternalFactorsSum(derivatedParameterNumber, t, true) * positiveSideOfParameterMultiplication
-                    - calculateExternalFactorsSum(derivatedParameterNumber, t, false) * negativeSideOfParameterMultiplication;
-            parameterToDependenciesCache.add(new ParameterToDependencies(derivatedParameterNumber, this.parameterPolynomialList, this.externalFactorPolynomialList));
+            dxdt[derivativeParameterNumber] = calculateExternalFactorsSum(derivativeParameterNumber, t, true) * positiveSideOfParameterMultiplication
+                    - calculateExternalFactorsSum(derivativeParameterNumber, t, false) * negativeSideOfParameterMultiplication;
+            derivativeParameterNumberToDependenciesCache.add(new DerivativeParameterNumberWithDependencies(derivativeParameterNumber, this.affectingParameterPolynomials, this.externalFactorPolynomialList));
         }
         //TODO useless multiple drawings during one traverse, it can be drowned only once
         if (IS_ENABLED_POLY_DRAWING) {
-            showPolys();
+            drawPolynomials();
         }
-        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(parameterToDependenciesCache);
+        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(derivativeParameterNumberToDependenciesCache);
         differentialSystemWriter.writeSystemToLatex();
         differentialSystemWriter.writeSystemToPdf();
-        parameterToDependenciesCache.clear();
-        rowColumnToRegressionModelCache.clear();
+        derivativeParameterNumberToDependenciesCache.clear();
+        polynomialDependenciesCache.clear();
         return dxdt;
     }
 
     //TODO useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save performance
-    private double createFunctionDependencyAndCalculatePartOfSideForDerivatedParameter(int derivativeParameterNumber, int affectingParameterNumber, double affectingParameterFunctionValueInGivenTime, boolean isPositiveSide) {
+    private double calculatePartOfForDerivativeParameterUsingExactAffecting(int derivativeParameterNumber, int affectingParameterNumber, double affectingParameterFunctionValueInGivenTime, boolean isPositiveDependency) {
+        OLSMultipleLinearRegression regression = findRegressionBetween(derivativeParameterNumber, affectingParameterNumber);
+        double[] coefficientsOfDependencyPolynomial = PolynomialUtils.truncatePolynomialCoefficientsDigits(regression.estimateRegressionParameters());
+        Map<String, Double> regressionStatisticParams = collectRegressionStatisticParams(regression);
+        this.affectingParameterPolynomials.add(new AffectingParameterPolynomial(affectingParameterNumber, coefficientsOfDependencyPolynomial, isPositiveDependency));
+        this.polynomialDependenciesCache.add(new PolynomialDependency(new Pair<>(derivativeParameterNumber, affectingParameterNumber), coefficientsOfDependencyPolynomial, regressionStatisticParams));
+        return calculateDerivativeParameterValueUsingRegressionFunction(coefficientsOfDependencyPolynomial, affectingParameterFunctionValueInGivenTime);
+    }
+
+    private OLSMultipleLinearRegression findRegressionBetween(int derivativeParameterNumber, int affectingParameterNumber) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         double[] sampleY = new double[statisticMatrix.get(0).size()];
         double[][] sampleX = new double[statisticMatrix.get(0).size()][REGRESSION_DEGREE];
@@ -84,28 +92,24 @@ public class DerivativeSystem implements DerivnFunction {
             sampleX[k][0] = statisticMatrix.get(affectingParameterNumber).get(k);
             regression.newSampleData(sampleY, sampleX);
         }
-        double[] coefficientsOfDependencyPolynomial = regression.estimateRegressionParameters();
-        coefficientsOfDependencyPolynomial = PolyUtils.trunkPolyCoefficientsDigits(coefficientsOfDependencyPolynomial);
-        Map<String, Double> regressionStatParams = collectRegressionStatParams(regression);
-        this.parameterPolynomialList.add(new ParameterPolynomial(affectingParameterNumber, coefficientsOfDependencyPolynomial, isPositiveSide));
-        this.rowColumnToRegressionModelCache.add(new RowColumnToRegressionModel(new Pair<>(derivativeParameterNumber, affectingParameterNumber), coefficientsOfDependencyPolynomial, regressionStatParams));
-        return calculateDerivativeParameterValueUsingRegressionFunction(coefficientsOfDependencyPolynomial, affectingParameterFunctionValueInGivenTime);
+        return regression;
     }
 
-    private double buildAndSaveExternalFactor(int j, double t, boolean isPositiveSide) {
+    private double calculatePartOfExternalFactorSum(int externalFactorNumber, double t, boolean isPositiveDependency) {
         SimpleRegression simpleRegression = new SimpleRegression();
-        simpleRegression.addData(0, statisticMatrix.get(j).get(0));
-        simpleRegression.addData(1, statisticMatrix.get(j).get(statisticMatrix.get(j).size() - 1));
-        this.externalFactorPolynomialList.add(new ExternalFactorPolynomial(j, simpleRegression.getSlope(), simpleRegression.getIntercept(), isPositiveSide));
+        simpleRegression.addData(0, statisticMatrix.get(externalFactorNumber).get(0));
+        simpleRegression.addData(1, statisticMatrix.get(externalFactorNumber).get(statisticMatrix.get(externalFactorNumber).size() - 1));
+        this.externalFactorPolynomialList.add(new ExternalFactorPolynomial(externalFactorNumber, simpleRegression.getSlope(), simpleRegression.getIntercept(), isPositiveDependency));
         return simpleRegression.predict(t);
     }
 
-    private Map<String, Double> collectRegressionStatParams(OLSMultipleLinearRegression regression) {
+    private Map<String, Double> collectRegressionStatisticParams(OLSMultipleLinearRegression regression) {
         Map<String, Double> statisticParams = new HashMap<>();
         statisticParams.put("Дисперсия регрессии", BigDecimal.valueOf(regression.estimateRegressandVariance())
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue());
-        double fisher = (regression.calculateRSquared() / (1 - regression.calculateRSquared() + 0.001)) * ((statisticMatrix.get(0).size() - REGRESSION_DEGREE - 1) / REGRESSION_DEGREE);
+        double fisher = (regression.calculateRSquared() / (1 - regression.calculateRSquared() + 0.001))
+                * ((statisticMatrix.get(0).size() - REGRESSION_DEGREE - 1) / REGRESSION_DEGREE);
         statisticParams.put("Критерий Фишера", BigDecimal.valueOf(fisher)
                         .setScale(2, RoundingMode.HALF_UP)
                                 .doubleValue());
@@ -134,27 +138,27 @@ public class DerivativeSystem implements DerivnFunction {
         return Arrays.asList(resultArray);
     }
 
-    private double calculateExternalFactorsSum(int rowNumber, double t, boolean isPositiveSide) {
+    private double calculateExternalFactorsSum(int derivativeParameterNumber, double t, boolean isPositiveSideOfStatement) {
         double resultSum = 1;
         for (int j = this.dependencyMatrix.size(); j < this.dependencyMatrix.get(0).size(); j++) {
-            if ((dependencyMatrix.get(rowNumber).get(j) == 1) && isPositiveSide) {
-                resultSum += buildAndSaveExternalFactor(j, t, true);
-            } else if ((dependencyMatrix.get(rowNumber).get(j) == -1) && !isPositiveSide) {
-                resultSum += buildAndSaveExternalFactor(j, t, false);
+            if ((dependencyMatrix.get(derivativeParameterNumber).get(j) == 1) && isPositiveSideOfStatement) {
+                resultSum += calculatePartOfExternalFactorSum(j, t, true);
+            } else if ((dependencyMatrix.get(derivativeParameterNumber).get(j) == -1) && !isPositiveSideOfStatement) {
+                resultSum += calculatePartOfExternalFactorSum(j, t, false);
             }
         }
         return resultSum;
     }
 
-    private void showPolys() {
-        if (rowColumnToRegressionModelCache.isEmpty()) {
+    private void drawPolynomials() {
+        if (polynomialDependenciesCache.isEmpty()) {
             throw new IllegalStateException("Polys list is empty, check your matrix");
         }
         XSSFWorkbook resultBook = new XSSFWorkbook();
         XSSFSheet resultPolySheet = resultBook.createSheet("resultPolySheet");
         XSSFDrawing drawingPatriarch = resultPolySheet.createDrawingPatriarch();
-        for (int k = 0; k < rowColumnToRegressionModelCache.size(); k++) {
-            showPoly(rowColumnToRegressionModelCache.get(k), drawingPatriarch,
+        for (int k = 0; k < polynomialDependenciesCache.size(); k++) {
+            drawPolynomial(polynomialDependenciesCache.get(k), drawingPatriarch,
                     k / dependencyMatrix.size(), k % dependencyMatrix.size());
         }
         try (FileOutputStream fileOutputStream = new FileOutputStream("resultPolyBook.xlsx")) {
@@ -165,8 +169,8 @@ public class DerivativeSystem implements DerivnFunction {
         }
     }
 
-    private void showPoly(RowColumnToRegressionModel aggregator, XSSFDrawing drawingPatriarch,
-                          int offsetRow, int offsetColumn) {
+    private void drawPolynomial(PolynomialDependency aggregator, XSSFDrawing drawingPatriarch,
+                                int offsetRow, int offsetColumn) {
         XSSFClientAnchor anchor = drawingPatriarch.createAnchor(0, 0, 0, 0,
                 (GRAPH_WIDTH + 3) * offsetColumn, (GRAPH_LENGTH + 3) * offsetRow,
                 GRAPH_WIDTH + (GRAPH_WIDTH + 3) * offsetColumn, GRAPH_LENGTH + (GRAPH_LENGTH + 3) * offsetRow);
@@ -174,14 +178,14 @@ public class DerivativeSystem implements DerivnFunction {
         XDDFChartLegend legend = chart.getOrAddLegend();
         legend.setPosition(LegendPosition.TOP_RIGHT);
         XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        bottomAxis.setTitle(parametersNames.get(aggregator.getRowColumn().getSecond()));
+        bottomAxis.setTitle(parametersNames.get(aggregator.getDerivativeParameterNumberToAffectingParameterNumber().getSecond()));
         XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-        leftAxis.setTitle(parametersNames.get(aggregator.getRowColumn().getFirst()));
+        leftAxis.setTitle(parametersNames.get(aggregator.getDerivativeParameterNumberToAffectingParameterNumber().getFirst()));
 
         XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
         data.setVaryColors(false);
-        enrichChartDataWithSeries(aggregator.getRowColumn().getFirst(),
-                aggregator.getRowColumn().getSecond(), aggregator.getPolynomialCoefficients(),
+        enrichChartDataWithSeries(aggregator.getDerivativeParameterNumberToAffectingParameterNumber().getFirst(),
+                aggregator.getDerivativeParameterNumberToAffectingParameterNumber().getSecond(), aggregator.getPolynomialCoefficients(),
                 aggregator.getRegressionMetrics(), data);
         chart.plot(data);
     }
@@ -189,7 +193,8 @@ public class DerivativeSystem implements DerivnFunction {
     private void enrichChartDataWithSeries(int derivativeParameterNumber, int affectingParameterNumber, double[] dependencyPolynomialCoefficients,
                                            Map<String, Double> regressionMetrics, XDDFLineChartData lineChartData) {
         List<Pair<Double, Double>> affectingParameterStatisticValuesToDerivativeParameterStaticValuesPairs = collectAffectingParameterStatisticValuesToDerivativeParameterValues(affectingParameterNumber, statisticMatrix.get(derivativeParameterNumber));
-        List<Pair<Double, Double>> pairForCalculatedLineChart = collectAffectingParameterStatisticValuesToDerivativeParameterValues(affectingParameterNumber, calculateDerivativeParameterValuesUsingRegressionFunction(dependencyPolynomialCoefficients, statisticMatrix.get(affectingParameterNumber)));
+        List<Pair<Double, Double>> pairForCalculatedLineChart = collectAffectingParameterStatisticValuesToDerivativeParameterValues(affectingParameterNumber,
+                calculateDerivativeParameterValuesUsingRegressionFunction(dependencyPolynomialCoefficients, statisticMatrix.get(affectingParameterNumber)));
         XDDFNumericalDataSource<Double> independentParameterStatisticValues = XDDFDataSourcesFactory.fromArray(affectingParameterStatisticValuesToDerivativeParameterStaticValuesPairs.stream()
                 .map(Pair::getKey)
                 .toArray(Double[]::new));
@@ -222,14 +227,14 @@ public class DerivativeSystem implements DerivnFunction {
 
     private String buildPolynomialTitle(int rowNumber, int columnNumber, double[] coeffs) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coeffs);
-        String polyPart = polynomialFunction.toString().replace("x", "X" + PolyUtils.generateSubscript(columnNumber + 1));
+        String polyPart = polynomialFunction.toString().replace("x", "X" + PolynomialUtils.generateSubscriptTitle(columnNumber + 1));
         while (polyPart.contains("^")) {
             int caretIndex = polyPart.indexOf("^");
             String degreePartSubstring = polyPart.substring(caretIndex + 1, caretIndex + 2);
-            String generatedSuperscript = PolyUtils.generateSuperscript(Integer.parseInt(degreePartSubstring));
+            String generatedSuperscript = PolynomialUtils.generateSuperscriptTitle(Integer.parseInt(degreePartSubstring));
             polyPart = polyPart.replace("^" + degreePartSubstring, generatedSuperscript);
         }
-        return "X" + PolyUtils.generateSubscript(rowNumber + 1) + " = " + polyPart;
+        return "X" + PolynomialUtils.generateSubscriptTitle(rowNumber + 1) + " = " + polyPart;
     }
 
     private String buildMetricsTitle(Map<String, Double> regressionMetrics) {

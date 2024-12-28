@@ -1,6 +1,6 @@
 package service;
 
-import deriv.DerivativeSystem;
+import derivative.DerivativeSystem;
 import flanagan.integration.RungeKutta;
 import lombok.Setter;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -42,9 +42,9 @@ public class CalculationService {
         double xn = 0.1D;
         double[] yn;
         double[][] ynParts = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
-        DerivativeSystem systemDeriv = new DerivativeSystem(dependenciesMatrix, statisticsMatrix, parametersNames);
+        DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, statisticsMatrix, parametersNames);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
-            yn = RungeKutta.fourthOrder(systemDeriv, x0, y0, xn, h);
+            yn = RungeKutta.fourthOrder(systemDerivative, x0, y0, xn, h);
          //   yn = correctEvaluations(yn, j, statisticsMatrix);
             for (int i = 0; i < dependenciesMatrix.size(); i++) {
                 ynParts[i][j] = yn[i];
@@ -129,9 +129,9 @@ public class CalculationService {
         }
     }
 
-    private double[] extractInitialValues(List<List<Double>> statisticsMatrix, int processLimit) {
-        double[] initials = new double[processLimit];
-        for (int i = 0; i < processLimit; i++) {
+    private double[] extractInitialValues(List<List<Double>> statisticsMatrix, int limitToStopAtExternalFactorsPart) {
+        double[] initials = new double[limitToStopAtExternalFactorsPart];
+        for (int i = 0; i < limitToStopAtExternalFactorsPart; i++) {
             initials[i] = statisticsMatrix.get(i).get(0);
         }
         return initials;

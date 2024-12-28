@@ -3,9 +3,9 @@ package service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import model.ParameterToDependencies;
+import model.DerivativeParameterNumberWithDependencies;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
-import utils.PolyUtils;
+import utils.PolynomialUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +19,7 @@ public class DifferentialSystemWriter {
 
     private static final String TEX_FILENAME = "equationSystem.tex";
 
-    private List<ParameterToDependencies> parametersEquationInformation;
+    private List<DerivativeParameterNumberWithDependencies> parametersEquationInformation;
 
     @SneakyThrows
     public void writeSystemToLatex() {
@@ -32,8 +32,8 @@ public class DifferentialSystemWriter {
             fileWriter.write("\\begin{document}\n");
             fileWriter.write("\\begin{equation*}\n");
             fileWriter.write("\\begin{cases}\n");
-            for (ParameterToDependencies parameterToDependencies : parametersEquationInformation) {
-                fileWriter.write(buildParameterRow(parameterToDependencies));
+            for (DerivativeParameterNumberWithDependencies derivativeParameterNumberWithDependencies : parametersEquationInformation) {
+                fileWriter.write(buildParameterRow(derivativeParameterNumberWithDependencies));
                 fileWriter.write("\\\\");
             }
             fileWriter.write("\\end{cases}\n");
@@ -62,25 +62,25 @@ public class DifferentialSystemWriter {
         }
     }
 
-    private String buildParameterRow(ParameterToDependencies parameterToDependencies) {
+    private String buildParameterRow(DerivativeParameterNumberWithDependencies derivativeParameterNumberWithDependencies) {
         StringBuilder parameterRow = new StringBuilder();
         parameterRow.append("\\frac{X_{")
-                .append(parameterToDependencies.getParameterIndex() + 1)
+                .append(derivativeParameterNumberWithDependencies.getDerivativeParameterNumber() + 1)
                 .append("}(t)}{dt} = (");
-        parameterRow = buildSideOfParameterRow(parameterToDependencies, parameterRow, true);
+        parameterRow = buildSideOfParameterRow(derivativeParameterNumberWithDependencies, parameterRow, true);
         parameterRow.append("\\\\");
         parameterRow.append("\\quad");
         parameterRow.append(" - (");
-        parameterRow = buildSideOfParameterRow(parameterToDependencies, parameterRow, false);
+        parameterRow = buildSideOfParameterRow(derivativeParameterNumberWithDependencies, parameterRow, false);
         return parameterRow.toString();
     }
 
-    private StringBuilder buildSideOfParameterRow(ParameterToDependencies parameterToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
+    private StringBuilder buildSideOfParameterRow(DerivativeParameterNumberWithDependencies derivatedParameterNumberToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
         int elementCounter = 0;
-        for (int i = 0; i < parameterToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (parameterToDependencies.getExternalFactorDependencies().get(i).isPositive() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append(buildExternalFactorString(PolyUtils.trunkPolyCoefficientDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getSlope()),
-                        PolyUtils.trunkPolyCoefficientDigits(parameterToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
+        for (int i = 0; i < derivatedParameterNumberToDependencies.getExternalFactorDependencies().size(); i++) {
+            if (derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientDigits(derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).getSlope()),
+                        PolynomialUtils.truncatePolynomialCoefficientDigits(derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
                 elementCounter++;
             }
         }
@@ -90,10 +90,10 @@ public class DifferentialSystemWriter {
         } else {
             parameterRowToAddPart.append(")");
         }
-        for (int i = 0; i < parameterToDependencies.getPolynomialDependencies().size(); i++) {
-            if (parameterToDependencies.getPolynomialDependencies().get(i).isPositive() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append("(").append(buildPolyString(parameterToDependencies.getPolynomialDependencies().get(i).getParameterIndex(),
-                        parameterToDependencies.getPolynomialDependencies().get(i).getPolyCoeffs())).append(")");
+        for (int i = 0; i < derivatedParameterNumberToDependencies.getPolynomialDependencies().size(); i++) {
+            if (derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber(),
+                        derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients())).append(")");
             }
         }
         return parameterRowToAddPart;
@@ -107,7 +107,7 @@ public class DifferentialSystemWriter {
         return "(" + polynomialFunction.toString().replace("x", "t") + ")";
     }
 
-    private String buildPolyString(int parameterNumber, double[] coefficients) {
+    private String buildPolynomialAsString(int parameterNumber, double[] coefficients) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
         return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
     }

@@ -6,8 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class ExternalFactorPolynomial {
-    private int factorIndex;
+    private int factorNumber;
     private double slope;
     private double intersection;
-    private boolean isPositive;
+    private boolean isPositiveDependency;
 }

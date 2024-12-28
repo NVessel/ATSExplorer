@@ -20,6 +20,19 @@ public class ViewComponentsBuilder {
         return anotherPolynomailHBox;
     }
 
+    public HBox buildInitialConditionHBox(String hboxLabelValue) {
+        HBox initialConditionHBox = new HBox(new Label(hboxLabelValue), this.getFilledTextFieldForInitialConditionHBox());
+        initialConditionHBox.setAlignment(Pos.CENTER_RIGHT);
+        return initialConditionHBox;
+    }
+
+    public HBox buildExternalFactorHBox(String externalFactorName) {
+        HBox externalFactorHBox = new HBox(new Label(externalFactorName + "(t) ="), this.getFilledTextFieldForExternalFactorHBox(),
+                new Label("t^2 +"), this.getFilledTextFieldForExternalFactorHBox(), new Label("t +"), this.getFilledTextFieldForExternalFactorHBox());
+        externalFactorHBox.setAlignment(Pos.CENTER_LEFT);
+        return externalFactorHBox;
+    }
+
     private Label getFilledLabelForAnotherPolynomialHBox(String labelValue) {
         Label label = new Label(labelValue);
         label.setFont(new Font(18));
@@ -36,24 +49,11 @@ public class ViewComponentsBuilder {
         return textField;
     }
 
-    public HBox buildInitialConditionHBox(String hboxLabelValue) {
-        HBox initialConditionHBox = new HBox(new Label(hboxLabelValue), this.getFilledTextFieldForInitialConditionHBox());
-        initialConditionHBox.setAlignment(Pos.CENTER_RIGHT);
-        return initialConditionHBox;
-    }
-
     private TextField getFilledTextFieldForInitialConditionHBox() {
         TextField textField = new TextField("0");
         textField.setAlignment(Pos.CENTER_RIGHT);
         textField.setPrefWidth(60);
         return textField;
-    }
-
-    public HBox buildExternalFactorHBox(String externalFactorName) {
-        HBox externalFactorHBox = new HBox(new Label(externalFactorName + "(t) ="), this.getFilledTextFieldForExternalFactorHBox(),
-                new Label("t^2 +"), this.getFilledTextFieldForExternalFactorHBox(), new Label("t +"), this.getFilledTextFieldForExternalFactorHBox());
-        externalFactorHBox.setAlignment(Pos.CENTER_LEFT);
-        return externalFactorHBox;
     }
 
     private TextField getFilledTextFieldForExternalFactorHBox() {

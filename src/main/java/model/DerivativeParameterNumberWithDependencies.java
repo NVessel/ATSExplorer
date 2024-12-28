@@ -7,9 +7,8 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class ParameterToDependencies {
-
-    private int parameterIndex;
-    private List<ParameterPolynomial> polynomialDependencies;
+public class DerivativeParameterNumberWithDependencies {
+    private int derivativeParameterNumber;
+    private List<AffectingParameterPolynomial> polynomialDependencies;
     private List<ExternalFactorPolynomial> externalFactorDependencies;
 }
