@@ -6,7 +6,6 @@ import flanagan.integration.DerivnFunction;
 import lombok.extern.java.Log;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.commons.math3.util.Pair;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
@@ -22,7 +21,8 @@ import java.util.logging.Level;
 @Log
 public class DerivativeSystem implements DerivnFunction {
 
-    private static final int REGRESSION_DEGREE = 1;
+    private static final int PARAMETERS_REGRESSION_DEGREE = 1;
+    private static final int EXTERNAL_FACTOR_REGRESSION_DEGREE = 1;
 
     private static final int GRAPH_WIDTH = 10;
     private static final int GRAPH_LENGTH = 20;
@@ -75,18 +75,25 @@ public class DerivativeSystem implements DerivnFunction {
 
     //TODO useless work, need tp build polys and log in separate provider, then inject polys and evaluate to save performance
     private double calculatePartOfForDerivativeParameterUsingExactAffecting(int derivativeParameterNumber, int affectingParameterNumber, double affectingParameterFunctionValueInGivenTime, boolean isPositiveDependency) {
-        OLSMultipleLinearRegression regression = findRegressionBetween(derivativeParameterNumber, affectingParameterNumber);
+        OLSMultipleLinearRegression regression = findRegressionBetweenParameters(derivativeParameterNumber, affectingParameterNumber);
         double[] coefficientsOfDependencyPolynomial = PolynomialUtils.truncatePolynomialCoefficientsDigits(regression.estimateRegressionParameters());
         Map<String, Double> regressionStatisticParams = collectRegressionStatisticParams(regression);
         this.affectingParameterPolynomials.add(new AffectingParameterPolynomial(affectingParameterNumber, coefficientsOfDependencyPolynomial, isPositiveDependency));
         this.polynomialDependenciesCache.add(new PolynomialDependency(new Pair<>(derivativeParameterNumber, affectingParameterNumber), coefficientsOfDependencyPolynomial, regressionStatisticParams));
-        return calculateDerivativeParameterValueUsingRegressionFunction(coefficientsOfDependencyPolynomial, affectingParameterFunctionValueInGivenTime);
+        return evaluatePolynomialForValueUsingCoefficients(coefficientsOfDependencyPolynomial, affectingParameterFunctionValueInGivenTime);
     }
 
-    private OLSMultipleLinearRegression findRegressionBetween(int derivativeParameterNumber, int affectingParameterNumber) {
+    private double calculatePartOfExternalFactorSum(int externalFactorNumber, double t, boolean isPositiveDependency) {
+        OLSMultipleLinearRegression regressionBetweenExternalFactorToTime = findRegressionBetweenExternalFactorToTime(externalFactorNumber);
+        double[] coefficientsOfExternalFactorPolynomial = PolynomialUtils.truncatePolynomialCoefficientsDigits(regressionBetweenExternalFactorToTime.estimateRegressionParameters());
+        this.externalFactorPolynomialList.add(new ExternalFactorPolynomial(externalFactorNumber, coefficientsOfExternalFactorPolynomial, isPositiveDependency));
+        return evaluatePolynomialForValueUsingCoefficients(coefficientsOfExternalFactorPolynomial, t);
+    }
+
+    private OLSMultipleLinearRegression findRegressionBetweenParameters(int derivativeParameterNumber, int affectingParameterNumber) {
         OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
         double[] sampleY = new double[statisticMatrix.get(0).size()];
-        double[][] sampleX = new double[statisticMatrix.get(0).size()][REGRESSION_DEGREE];
+        double[][] sampleX = new double[statisticMatrix.get(0).size()][PARAMETERS_REGRESSION_DEGREE];
         for (int k = 0; k < statisticMatrix.get(0).size(); k++) {
             sampleY[k] = statisticMatrix.get(derivativeParameterNumber).get(k);
             sampleX[k][0] = statisticMatrix.get(affectingParameterNumber).get(k);
@@ -95,12 +102,16 @@ public class DerivativeSystem implements DerivnFunction {
         return regression;
     }
 
-    private double calculatePartOfExternalFactorSum(int externalFactorNumber, double t, boolean isPositiveDependency) {
-        SimpleRegression simpleRegression = new SimpleRegression();
-        simpleRegression.addData(0, statisticMatrix.get(externalFactorNumber).get(0));
-        simpleRegression.addData(1, statisticMatrix.get(externalFactorNumber).get(statisticMatrix.get(externalFactorNumber).size() - 1));
-        this.externalFactorPolynomialList.add(new ExternalFactorPolynomial(externalFactorNumber, simpleRegression.getSlope(), simpleRegression.getIntercept(), isPositiveDependency));
-        return simpleRegression.predict(t);
+    private OLSMultipleLinearRegression findRegressionBetweenExternalFactorToTime(int externalFactorNumber) {
+        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+        double[] sampleY = new double[statisticMatrix.get(0).size()];
+        double[][] sampleX = new double[statisticMatrix.get(0).size()][EXTERNAL_FACTOR_REGRESSION_DEGREE];
+        for (int k = 0; k < statisticMatrix.get(0).size(); k++) {
+            sampleY[k] = statisticMatrix.get(externalFactorNumber).get(k);
+            sampleX[k][0] = (double) k/statisticMatrix.get(0).size();
+            regression.newSampleData(sampleY, sampleX);
+        }
+        return regression;
     }
 
     private Map<String, Double> collectRegressionStatisticParams(OLSMultipleLinearRegression regression) {
@@ -109,7 +120,7 @@ public class DerivativeSystem implements DerivnFunction {
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue());
         double fisher = (regression.calculateRSquared() / (1 - regression.calculateRSquared() + 0.001))
-                * ((statisticMatrix.get(0).size() - REGRESSION_DEGREE - 1) / (double) REGRESSION_DEGREE);
+                * ((statisticMatrix.get(0).size() - PARAMETERS_REGRESSION_DEGREE - 1) / (double) PARAMETERS_REGRESSION_DEGREE);
         statisticParams.put("Критерий Фишера", BigDecimal.valueOf(fisher)
                         .setScale(2, RoundingMode.HALF_UP)
                                 .doubleValue());
@@ -122,7 +133,7 @@ public class DerivativeSystem implements DerivnFunction {
         return statisticParams;
     }
 
-    private double calculateDerivativeParameterValueUsingRegressionFunction(double[] regressionPolynomialCoefficients, double affectingParameterValue) {
+    private double evaluatePolynomialForValueUsingCoefficients(double[] regressionPolynomialCoefficients, double affectingParameterValue) {
         double resultSum = 0;
         for (int k = 0; k < regressionPolynomialCoefficients.length; k++) {
             resultSum += regressionPolynomialCoefficients[k] * Math.pow(affectingParameterValue, k);
@@ -133,7 +144,7 @@ public class DerivativeSystem implements DerivnFunction {
     private List<Double> calculateDerivativeParameterValuesUsingRegressionFunction(double[] regressionPolynomialCoefficients, List<Double> affectingParameterValues) {
         Double[] resultArray = new Double[affectingParameterValues.size()];
         for (int i = 0; i < resultArray.length; i++) {
-            resultArray[i] = calculateDerivativeParameterValueUsingRegressionFunction(regressionPolynomialCoefficients, affectingParameterValues.get(i));
+            resultArray[i] = evaluatePolynomialForValueUsingCoefficients(regressionPolynomialCoefficients, affectingParameterValues.get(i));
         }
         return Arrays.asList(resultArray);
     }

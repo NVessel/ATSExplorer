@@ -79,8 +79,7 @@ public class DifferentialSystemWriter {
         int elementCounter = 0;
         for (int i = 0; i < derivativeParameterNumberToDependencies.getExternalFactorDependencies().size(); i++) {
             if (derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getSlope()),
-                        PolynomialUtils.truncatePolynomialCoefficientDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
+                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientsDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getPolynomialCoefficients()), elementCounter));
                 elementCounter++;
             }
         }
@@ -92,22 +91,22 @@ public class DifferentialSystemWriter {
         }
         for (int i = 0; i < derivativeParameterNumberToDependencies.getPolynomialDependencies().size(); i++) {
             if (derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber(),
-                        derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients())).append(")");
+                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients(), derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber()
+                )).append(")");
             }
         }
         return parameterRowToAddPart;
     }
 
-    private String buildExternalFactorString(double slope, double intercept, int elementCounter) {
-        PolynomialFunction polynomialFunction = new PolynomialFunction(new double[] {intercept, slope});
+    private String buildExternalFactorString(double[] polynomialCoefficients, int elementCounter) {
+        PolynomialFunction polynomialFunction = new PolynomialFunction(polynomialCoefficients);
         if (elementCounter > 0) {
             return " + (" + polynomialFunction.toString().replace("x", "t") + ")";
         }
         return "(" + polynomialFunction.toString().replace("x", "t") + ")";
     }
 
-    private String buildPolynomialAsString(int parameterNumber, double[] coefficients) {
+    private String buildPolynomialAsString(double[] coefficients, int parameterNumber) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
         return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
     }
