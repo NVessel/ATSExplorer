@@ -50,11 +50,11 @@ public class DerivativeSystem implements DerivnFunction {
             double negativeSideOfParameterMultiplication = 1;
             this.affectingParameterPolynomials = new ArrayList<>();
             this.externalFactorPolynomialList = new ArrayList<>();
-            for (int affectingOnDerivatedParameterNumber = 0; affectingOnDerivatedParameterNumber < this.dependencyMatrix.size(); affectingOnDerivatedParameterNumber++) {
-                if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivatedParameterNumber) == 1) {
-                    positiveSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], true);
-                } else if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivatedParameterNumber) == -1) {
-                    negativeSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivatedParameterNumber, x[affectingOnDerivatedParameterNumber], false);
+            for (int affectingOnDerivativeParameterNumber = 0; affectingOnDerivativeParameterNumber < this.dependencyMatrix.size(); affectingOnDerivativeParameterNumber++) {
+                if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivativeParameterNumber) == 1) {
+                    positiveSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivativeParameterNumber, x[affectingOnDerivativeParameterNumber], true);
+                } else if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivativeParameterNumber) == -1) {
+                    negativeSideOfParameterMultiplication *= calculatePartOfForDerivativeParameterUsingExactAffecting(derivativeParameterNumber, affectingOnDerivativeParameterNumber, x[affectingOnDerivativeParameterNumber], false);
                 }
             }
             dxdt[derivativeParameterNumber] = calculateExternalFactorsSum(derivativeParameterNumber, t, true) * positiveSideOfParameterMultiplication
@@ -109,7 +109,7 @@ public class DerivativeSystem implements DerivnFunction {
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue());
         double fisher = (regression.calculateRSquared() / (1 - regression.calculateRSquared() + 0.001))
-                * ((statisticMatrix.get(0).size() - REGRESSION_DEGREE - 1) / REGRESSION_DEGREE);
+                * ((statisticMatrix.get(0).size() - REGRESSION_DEGREE - 1) / (double) REGRESSION_DEGREE);
         statisticParams.put("Критерий Фишера", BigDecimal.valueOf(fisher)
                         .setScale(2, RoundingMode.HALF_UP)
                                 .doubleValue());
@@ -225,16 +225,16 @@ public class DerivativeSystem implements DerivnFunction {
         return affectingParameterStatisticValuesToDerivativeParameterValues;
     }
 
-    private String buildPolynomialTitle(int rowNumber, int columnNumber, double[] coeffs) {
-        PolynomialFunction polynomialFunction = new PolynomialFunction(coeffs);
-        String polyPart = polynomialFunction.toString().replace("x", "X" + PolynomialUtils.generateSubscriptTitle(columnNumber + 1));
+    private String buildPolynomialTitle(int derivativeParameterNumber, int affectingParameterNumber, double[] dependencyPolynomialCoefficients) {
+        PolynomialFunction polynomialFunction = new PolynomialFunction(dependencyPolynomialCoefficients);
+        String polyPart = polynomialFunction.toString().replace("x", "X" + PolynomialUtils.generateSubscriptTitle(affectingParameterNumber + 1));
         while (polyPart.contains("^")) {
             int caretIndex = polyPart.indexOf("^");
             String degreePartSubstring = polyPart.substring(caretIndex + 1, caretIndex + 2);
             String generatedSuperscript = PolynomialUtils.generateSuperscriptTitle(Integer.parseInt(degreePartSubstring));
             polyPart = polyPart.replace("^" + degreePartSubstring, generatedSuperscript);
         }
-        return "X" + PolynomialUtils.generateSubscriptTitle(rowNumber + 1) + " = " + polyPart;
+        return "X" + PolynomialUtils.generateSubscriptTitle(derivativeParameterNumber + 1) + " = " + polyPart;
     }
 
     private String buildMetricsTitle(Map<String, Double> regressionMetrics) {

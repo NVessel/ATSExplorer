@@ -45,7 +45,6 @@ public class CalculationService {
         DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, statisticsMatrix, parametersNames);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
             yn = RungeKutta.fourthOrder(systemDerivative, x0, y0, xn, h);
-         //   yn = correctEvaluations(yn, j, statisticsMatrix);
             for (int i = 0; i < dependenciesMatrix.size(); i++) {
                 ynParts[i][j] = yn[i];
             }

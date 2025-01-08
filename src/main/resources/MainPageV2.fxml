@@ -83,7 +83,7 @@
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="191.0" prefWidth="536.0">
                                        <children>
-                                          <Button layoutX="136.0" layoutY="14.0" mnemonicParsing="false" text="Решить систему уравнений в тестовом режиме" />
+                                          <Button layoutX="136.0" layoutY="14.0" mnemonicParsing="false" onAction="#calculateOnGivenDependencies" text="Решить систему уравнений в тестовом режиме" />
                                           <Button fx:id="statisticsCalculationButton" layoutX="130.0" layoutY="49.0" mnemonicParsing="false" onAction="#calculateOnStatistics" text="Решить систему уравнений на основе статистики" />
                                           <Button layoutX="119.0" layoutY="86.0" mnemonicParsing="false" onAction="#showSolutionResults" text="Отобразить результаты решения системы уравнений" />
                                           <Button layoutX="108.0" layoutY="123.0" mnemonicParsing="false" onAction="#showDependenciesGraphs" text="Отобразить графики зависимостей параметров системы" />

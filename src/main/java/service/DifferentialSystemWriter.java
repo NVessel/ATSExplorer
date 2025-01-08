@@ -75,12 +75,12 @@ public class DifferentialSystemWriter {
         return parameterRow.toString();
     }
 
-    private StringBuilder buildSideOfParameterRow(DerivativeParameterNumberWithDependencies derivatedParameterNumberToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
+    private StringBuilder buildSideOfParameterRow(DerivativeParameterNumberWithDependencies derivativeParameterNumberToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
         int elementCounter = 0;
-        for (int i = 0; i < derivatedParameterNumberToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientDigits(derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).getSlope()),
-                        PolynomialUtils.truncatePolynomialCoefficientDigits(derivatedParameterNumberToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
+        for (int i = 0; i < derivativeParameterNumberToDependencies.getExternalFactorDependencies().size(); i++) {
+            if (derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getSlope()),
+                        PolynomialUtils.truncatePolynomialCoefficientDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getIntersection()), elementCounter));
                 elementCounter++;
             }
         }
@@ -90,10 +90,10 @@ public class DifferentialSystemWriter {
         } else {
             parameterRowToAddPart.append(")");
         }
-        for (int i = 0; i < derivatedParameterNumberToDependencies.getPolynomialDependencies().size(); i++) {
-            if (derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber(),
-                        derivatedParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients())).append(")");
+        for (int i = 0; i < derivativeParameterNumberToDependencies.getPolynomialDependencies().size(); i++) {
+            if (derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber(),
+                        derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients())).append(")");
             }
         }
         return parameterRowToAddPart;

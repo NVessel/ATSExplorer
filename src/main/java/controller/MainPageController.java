@@ -33,7 +33,7 @@ public class MainPageController {
     private final ViewComponentsBuilder viewComponentsBuilder = new ViewComponentsBuilder();
 
     @FXML
-    private void calculateDerivs() {
+    private void calculateOnGivenDependencies() {
 
         /*Write results*/
     }
