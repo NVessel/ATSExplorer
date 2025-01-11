@@ -7,7 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.java.Log;
 import service.CalculationService;
-import service.ResultsDemonstrationService;
+import service.FilesDemonstrationService;
 import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.StatisticsSupplier;
 
@@ -28,7 +28,7 @@ public class MainPageController {
     @FXML
     private VBox equationsVBox;
 
-    private final ResultsDemonstrationService resultsDemonstrationService = new ResultsDemonstrationService();
+    private final FilesDemonstrationService filesDemonstrationService = new FilesDemonstrationService();
     private final CalculationService calculationService = new CalculationService();
     private final ViewComponentsBuilder viewComponentsBuilder = new ViewComponentsBuilder();
 
@@ -86,17 +86,17 @@ public class MainPageController {
 
     @FXML
     private void showSolutionResults() {
-        this.resultsDemonstrationService.showSolutionResults();
+        this.filesDemonstrationService.showSolutionResults();
     }
 
     @FXML
     private void showDependenciesGraphs() {
-        this.resultsDemonstrationService.showDependenciesGraphsResults();
+        this.filesDemonstrationService.showDependenciesGraphsResults();
     }
 
     @FXML
     private void showDifferentialEquationsSystem() {
-        this.resultsDemonstrationService.showDifferentialEquationsSystemResults();
+        this.filesDemonstrationService.showDifferentialEquationsSystemResults();
     }
 
     @FXML

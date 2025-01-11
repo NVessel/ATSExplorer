@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 @Log
-public class ResultsDemonstrationService {
+public class FilesDemonstrationService {
 
     private static final Desktop DESKTOP = Desktop.getDesktop();
 

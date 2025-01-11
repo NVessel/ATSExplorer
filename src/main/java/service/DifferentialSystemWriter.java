@@ -3,7 +3,6 @@ package service;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import model.DerivativeParameterNumberWithDependencies;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import utils.PolynomialUtils;
 
@@ -18,9 +17,7 @@ import java.util.logging.Level;
 public class DifferentialSystemWriter {
 
     private static final String TEX_FILENAME = "equationSystem.tex";
-
-    private List<DerivativeParameterNumberWithDependencies> parametersEquationInformation;
-
+/*
     @SneakyThrows
     public void writeSystemToLatex() {
         File latexFile = new File(TEX_FILENAME);
@@ -109,5 +106,5 @@ public class DifferentialSystemWriter {
     private String buildPolynomialAsString(double[] coefficients, int parameterNumber) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
         return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
-    }
+    }*/
 }

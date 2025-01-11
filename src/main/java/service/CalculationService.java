@@ -3,6 +3,7 @@ package service;
 import derivative.DerivativeSystem;
 import flanagan.integration.RungeKutta;
 import lombok.Setter;
+import model.PolynomialDependency;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -12,6 +13,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.*;
 import suppliers.ParametersDependenciesMatrixSupplier;
+import suppliers.PolynomialDependenciesSupplier;
 import suppliers.StatisticsSupplier;
 
 import java.io.FileOutputStream;
@@ -35,6 +37,15 @@ public class CalculationService {
         List<List<Integer>> dependenciesMatrix = parametersDependenciesMatrixSupplier.getExternalMatrix();
         List<List<Double>> statisticsMatrix = statisticsSupplier.getExternalStatistics();
         List<String> parametersNames = parametersDependenciesMatrixSupplier.getParametersNames();
+
+        PolynomialDependenciesSupplier polynomialDependenciesSupplier = new PolynomialDependenciesSupplier(dependenciesMatrix, statisticsMatrix);
+        List<PolynomialDependency> polynomialDependencies = polynomialDependenciesSupplier.getPolynomialDependencies();
+        ExcelDrawingService excelDrawingService = new ExcelDrawingService(dependenciesMatrix, statisticsMatrix, parametersNames, polynomialDependencies);
+        excelDrawingService.drawPolynomials();
+        /*DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(polynomialDependencies);
+        differentialSystemWriter.writeSystemToLatex();
+        differentialSystemWriter.writeSystemToPdf();*/
+
         double[] y0 = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
         double[] y0copy = y0;
         double h = 0.01;
@@ -42,7 +53,7 @@ public class CalculationService {
         double xn = 0.1D;
         double[] yn;
         double[][] ynParts = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
-        DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, statisticsMatrix, parametersNames);
+        DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, polynomialDependencies);
         for (int j = 0; j < ITERATIONS_COUNT; j++) {
             yn = RungeKutta.fourthOrder(systemDerivative, x0, y0, xn, h);
             for (int i = 0; i < dependenciesMatrix.size(); i++) {

@@ -10,6 +10,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class PolynomialDependency {
     private Pair<Integer, Integer> derivativeParameterNumberToAffectingParameterNumber;
+    private boolean isAffectingParameterPositiveDependency;
     private double[] polynomialCoefficients;
     private Map<String, Double> regressionMetrics;
 }
