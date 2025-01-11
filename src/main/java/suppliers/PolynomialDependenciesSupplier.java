@@ -23,19 +23,21 @@ public class PolynomialDependenciesSupplier {
     public List<PolynomialDependency> getPolynomialDependencies() {
         List<PolynomialDependency> polynomialDependencies = new ArrayList<>();
         for (int derivativeParameterNumber = 0; derivativeParameterNumber < this.dependencyMatrix.size(); derivativeParameterNumber++) {
-            for (int affectingOnDerivativeParameterNumber = 0; affectingOnDerivativeParameterNumber < this.dependencyMatrix.size(); affectingOnDerivativeParameterNumber++) {
-                if (dependencyMatrix.get(derivativeParameterNumber).get(affectingOnDerivativeParameterNumber) != 0) {
-                    polynomialDependencies.add(buildParameterPolynomialDependency(derivativeParameterNumber, affectingOnDerivativeParameterNumber));
-                }
-            }
-
-            for (int externalFactorNumber = this.dependencyMatrix.size(); externalFactorNumber < this.dependencyMatrix.get(0).size(); externalFactorNumber++) {
-                if (dependencyMatrix.get(derivativeParameterNumber).get(externalFactorNumber) != 0) {
-                    polynomialDependencies.add(buildExternalFactorPolynomialDependency(derivativeParameterNumber, externalFactorNumber));
+            for (int affectingParameterOrExternalNumber = 0; affectingParameterOrExternalNumber < this.dependencyMatrix.get(0).size(); affectingParameterOrExternalNumber++) {
+                if (dependencyMatrix.get(derivativeParameterNumber).get(affectingParameterOrExternalNumber) != 0) {
+                    if (isParameterAndNotExternalFactorNumber(affectingParameterOrExternalNumber)) {
+                        polynomialDependencies.add(buildParameterPolynomialDependency(derivativeParameterNumber, affectingParameterOrExternalNumber));
+                    } else {
+                        polynomialDependencies.add(buildExternalFactorPolynomialDependency(derivativeParameterNumber, affectingParameterOrExternalNumber));
+                    }
                 }
             }
         }
         return polynomialDependencies;
+    }
+
+    private boolean isParameterAndNotExternalFactorNumber(int affectingParameterOrExternalNumber) {
+        return affectingParameterOrExternalNumber < this.dependencyMatrix.size();
     }
 
     private PolynomialDependency buildExternalFactorPolynomialDependency(int derivativeParameterNumber, int externalFactorNumber) {

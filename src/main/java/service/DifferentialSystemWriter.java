@@ -1,8 +1,8 @@
 package service;
 
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
+import model.PolynomialDependency;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 import utils.PolynomialUtils;
 
@@ -10,16 +10,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Log
-@AllArgsConstructor
 public class DifferentialSystemWriter {
 
     private static final String TEX_FILENAME = "equationSystem.tex";
-/*
+
     @SneakyThrows
-    public void writeSystemToLatex() {
+    public void writeSystemToLatex(List<PolynomialDependency> polynomialDependencies) {
         File latexFile = new File(TEX_FILENAME);
         try (FileWriter fileWriter = new FileWriter(latexFile)) {
             fileWriter.write("\\documentclass[12pt, letterpaper]{article}\n");
@@ -29,8 +30,9 @@ public class DifferentialSystemWriter {
             fileWriter.write("\\begin{document}\n");
             fileWriter.write("\\begin{equation*}\n");
             fileWriter.write("\\begin{cases}\n");
-            for (DerivativeParameterNumberWithDependencies derivativeParameterNumberWithDependencies : parametersEquationInformation) {
-                fileWriter.write(buildParameterRow(derivativeParameterNumberWithDependencies));
+            Map<Integer, List<PolynomialDependency>> derivativeParameterNumberToDependencies = buildDerivativeParameterNumberToItsDependencies(polynomialDependencies);
+            for (Map.Entry<Integer, List<PolynomialDependency>> numberToDependencies : derivativeParameterNumberToDependencies.entrySet()) {
+                fileWriter.write(buildParameterRow(numberToDependencies.getKey(), numberToDependencies.getValue()));
                 fileWriter.write("\\\\");
             }
             fileWriter.write("\\end{cases}\n");
@@ -39,7 +41,7 @@ public class DifferentialSystemWriter {
         }
     }
 
-    public void writeSystemToPdf() {
+    public void makePdfFromLatexFile() {
         File latexFile = new File(TEX_FILENAME);
         if (latexFile.exists()) {
             startPdfCreationProcess();
@@ -59,37 +61,46 @@ public class DifferentialSystemWriter {
         }
     }
 
-    private String buildParameterRow(DerivativeParameterNumberWithDependencies derivativeParameterNumberWithDependencies) {
+    private Map<Integer, List<PolynomialDependency>> buildDerivativeParameterNumberToItsDependencies(List<PolynomialDependency> polynomialDependencies) {
+        return polynomialDependencies
+                .stream()
+                .collect(Collectors.groupingBy(polynomialDependency -> polynomialDependency.getDerivativeParameterNumberToAffectingParameterNumber().getKey()));
+    }
+
+    private String buildParameterRow(Integer derivativeParameterNumber, List<PolynomialDependency> polynomialDependencies) {
         StringBuilder parameterRow = new StringBuilder();
-        parameterRow.append("\\frac{X_{")
-                .append(derivativeParameterNumberWithDependencies.getDerivativeParameterNumber() + 1)
+        parameterRow.append("\\frac{dX_{")
+                .append(derivativeParameterNumber + 1)
                 .append("}(t)}{dt} = (");
-        parameterRow = buildSideOfParameterRow(derivativeParameterNumberWithDependencies, parameterRow, true);
+        parameterRow = buildSideOfParameterRow(polynomialDependencies, parameterRow, true);
         parameterRow.append("\\\\");
         parameterRow.append("\\quad");
         parameterRow.append(" - (");
-        parameterRow = buildSideOfParameterRow(derivativeParameterNumberWithDependencies, parameterRow, false);
+        parameterRow = buildSideOfParameterRow(polynomialDependencies, parameterRow, false);
         return parameterRow.toString();
     }
 
-    private StringBuilder buildSideOfParameterRow(DerivativeParameterNumberWithDependencies derivativeParameterNumberToDependencies, StringBuilder parameterRowToAddPart, boolean isPositiveSideNeeded) {
+    private StringBuilder buildSideOfParameterRow(List<PolynomialDependency> polynomialDependencies,
+                                                  StringBuilder parameterRowToAddPart,
+                                                  boolean isPositiveSideNeeded) {
         int elementCounter = 0;
-        for (int i = 0; i < derivativeParameterNumberToDependencies.getExternalFactorDependencies().size(); i++) {
-            if (derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientsDigits(derivativeParameterNumberToDependencies.getExternalFactorDependencies().get(i).getPolynomialCoefficients()), elementCounter));
+        for (PolynomialDependency polynomialDependency : polynomialDependencies) {
+            if (polynomialDependency.getRegressionMetrics().isEmpty() &&
+                    polynomialDependency.isAffectingParameterPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append(buildExternalFactorString(PolynomialUtils.truncatePolynomialCoefficientsDigits(polynomialDependency.getPolynomialCoefficients()), elementCounter));
                 elementCounter++;
             }
         }
         //case when only one external factor or none – useless parentheses is not needed
         if (elementCounter < 2) {
-            parameterRowToAddPart = new StringBuilder(parameterRowToAddPart.substring(0, parameterRowToAddPart.lastIndexOf("(")) + parameterRowToAddPart.substring(parameterRowToAddPart.lastIndexOf("(") + 1));
+            parameterRowToAddPart = new StringBuilder(parameterRowToAddPart.substring(0,
+                    parameterRowToAddPart.lastIndexOf("(")) + parameterRowToAddPart.substring(parameterRowToAddPart.lastIndexOf("(") + 1));
         } else {
             parameterRowToAddPart.append(")");
         }
-        for (int i = 0; i < derivativeParameterNumberToDependencies.getPolynomialDependencies().size(); i++) {
-            if (derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).isPositiveDependency() == isPositiveSideNeeded) {
-                parameterRowToAddPart.append("(").append(buildPolynomialAsString(derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getPolynomialCoefficients(), derivativeParameterNumberToDependencies.getPolynomialDependencies().get(i).getParameterNumber()
-                )).append(")");
+        for (PolynomialDependency polynomialDependency : polynomialDependencies) {
+            if (!polynomialDependency.getRegressionMetrics().isEmpty() && polynomialDependency.isAffectingParameterPositiveDependency() == isPositiveSideNeeded) {
+                parameterRowToAddPart.append("(").append(buildPolynomialAsString(polynomialDependency.getPolynomialCoefficients(), polynomialDependency.getDerivativeParameterNumberToAffectingParameterNumber().getValue())).append(")");
             }
         }
         return parameterRowToAddPart;
@@ -106,5 +117,5 @@ public class DifferentialSystemWriter {
     private String buildPolynomialAsString(double[] coefficients, int parameterNumber) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
         return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
-    }*/
+    }
 }
