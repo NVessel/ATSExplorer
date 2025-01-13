@@ -18,13 +18,11 @@ public class CalculationService {
     private static final int ITERATIONS_COUNT = 12;
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
 
-    private ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier;
-    private StatisticsSupplier statisticsSupplier;
-
-    public void calculateOnStatistics() throws IOException, InvalidFormatException {
-        List<List<Integer>> dependenciesMatrix = parametersDependenciesMatrixSupplier.getExternalMatrix();
+    public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
+                                      StatisticsSupplier statisticsSupplier) throws IOException, InvalidFormatException {
+        List<List<Integer>> dependenciesMatrix = dependenciesMatrixSupplier.getExternalMatrix();
         List<List<Double>> statisticsMatrix = statisticsSupplier.getExternalStatistics();
-        List<String> parametersNames = parametersDependenciesMatrixSupplier.getParametersNames();
+        List<String> parametersNames = dependenciesMatrixSupplier.getParametersNames();
 
         List<PolynomialDependency> polynomialDependencies = new PolynomialDependenciesSupplier(dependenciesMatrix, statisticsMatrix)
                 .getPolynomialDependencies();
@@ -49,6 +47,10 @@ public class CalculationService {
             t1 += 0.1;
         }
         excelDrawingService.drawResults(extractInitialValues(statisticsMatrix, dependenciesMatrix.size()), derivativeParametersValuesForTimeMoments);
+    }
+
+    public void calculateOnManualSettings() {
+
     }
 
     private void writeSystemToFiles(List<PolynomialDependency> polynomialDependencies) {

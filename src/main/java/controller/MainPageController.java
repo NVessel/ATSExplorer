@@ -31,17 +31,22 @@ public class MainPageController {
     private final FilesDemonstrationService filesDemonstrationService = new FilesDemonstrationService();
     private final CalculationService calculationService = new CalculationService();
     private final ViewComponentsBuilder viewComponentsBuilder = new ViewComponentsBuilder();
+    private ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier;
+    private StatisticsSupplier statisticsSupplier;
 
     @FXML
     private void calculateOnGivenDependencies() {
-
-        /*Write results*/
+        if (areManualSettingsReady()) {
+            calculationService.calculateOnManualSettings();
+        } else {
+            log.warning("Can not calculate manually because some boxes are empty");
+        }
     }
 
     @FXML
     private void calculateOnStatistics() {
         try {
-            calculationService.calculateOnStatistics();
+            calculationService.calculateOnStatistics(this.parametersDependenciesMatrixSupplier, this.statisticsSupplier);
             log.log(Level.INFO, "Calculation is completed!");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Something was wrong in calculation", e);
@@ -53,10 +58,9 @@ public class MainPageController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("excelFilter", "*.xlsx"));
         File matrixFile = fileChooser.showOpenDialog(mainPageRootVBox.getScene().getWindow());
-        ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier = new ParametersDependenciesMatrixSupplier(matrixFile);
-        this.redrawInitialConditions(parametersDependenciesMatrixSupplier);
-        this.redrawExternalFactors(parametersDependenciesMatrixSupplier);
-        this.calculationService.setParametersDependenciesMatrixSupplier(parametersDependenciesMatrixSupplier);
+        this.parametersDependenciesMatrixSupplier = new ParametersDependenciesMatrixSupplier(matrixFile);
+        this.redrawInitialConditions();
+        this.redrawExternalFactors();
     }
 
     @FXML
@@ -64,7 +68,7 @@ public class MainPageController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("excelFilter", "*.xlsx"));
         File statisticFile = fileChooser.showOpenDialog(mainPageRootVBox.getScene().getWindow());
-        this.calculationService.setStatisticsSupplier(new StatisticsSupplier(statisticFile));
+        this.statisticsSupplier = new StatisticsSupplier(statisticFile);
     }
 
     @FXML
@@ -104,16 +108,22 @@ public class MainPageController {
         System.exit(0);
     }
 
-    private void redrawInitialConditions(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier) {
+    private void redrawInitialConditions() {
         initialConditionsVBox.getChildren().clear();
-        for (String parameterName : parametersDependenciesMatrixSupplier.getParametersNames()) {
+        for (String parameterName : this.parametersDependenciesMatrixSupplier.getParametersNames()) {
             initialConditionsVBox.getChildren().add(viewComponentsBuilder.buildInitialConditionHBox(parameterName));
         }
     }
 
-    private void redrawExternalFactors(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier) {
+    private boolean areManualSettingsReady() {
+        return !initialConditionsVBox.getChildren().isEmpty()
+                && !equationsVBox.getChildren().isEmpty()
+                && !equationsVBox.getChildren().isEmpty();
+    }
+
+    private void redrawExternalFactors() {
         externalFactorsVBox.getChildren().clear();
-        for (String externalFactorName : parametersDependenciesMatrixSupplier.getExternalFactorsNames()) {
+        for (String externalFactorName : this.parametersDependenciesMatrixSupplier.getExternalFactorsNames()) {
             externalFactorsVBox.getChildren().add(viewComponentsBuilder.buildExternalFactorHBox(externalFactorName));
         }
     }
