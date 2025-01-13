@@ -26,13 +26,12 @@ public class CalculationService {
         List<List<Double>> statisticsMatrix = statisticsSupplier.getExternalStatistics();
         List<String> parametersNames = parametersDependenciesMatrixSupplier.getParametersNames();
 
-        PolynomialDependenciesSupplier polynomialDependenciesSupplier = new PolynomialDependenciesSupplier(dependenciesMatrix, statisticsMatrix);
-        List<PolynomialDependency> polynomialDependencies = polynomialDependenciesSupplier.getPolynomialDependencies();
-        ExcelDrawingService excelDrawingService = new ExcelDrawingService(dependenciesMatrix, statisticsMatrix, parametersNames, polynomialDependencies);
+        List<PolynomialDependency> polynomialDependencies = new PolynomialDependenciesSupplier(dependenciesMatrix, statisticsMatrix)
+                .getPolynomialDependencies();
+        ExcelDrawingService excelDrawingService = new ExcelDrawingService(dependenciesMatrix, statisticsMatrix,
+                parametersNames, polynomialDependencies);
         excelDrawingService.drawPolynomials();
-        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter();
-        differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
-        differentialSystemWriter.makePdfFromLatexFile();
+        writeSystemToFiles(polynomialDependencies);
 
         double[] derivativeParametersValues = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
         double h = 0.01;
@@ -49,7 +48,13 @@ public class CalculationService {
             t0 += 0.1;
             t1 += 0.1;
         }
-        excelDrawingService.drawResults(extractInitialValues(statisticsMatrix, dependenciesMatrix.size()), derivativeParametersValuesForTimeMoments, statisticsMatrix, parametersNames);
+        excelDrawingService.drawResults(extractInitialValues(statisticsMatrix, dependenciesMatrix.size()), derivativeParametersValuesForTimeMoments);
+    }
+
+    private void writeSystemToFiles(List<PolynomialDependency> polynomialDependencies) {
+        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter();
+        differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
+        differentialSystemWriter.makePdfFromLatexFile();
     }
 
     private double[] correctEvaluations(double[] yn, int timeCount, List<List<Double>> statisticsMatrix) {

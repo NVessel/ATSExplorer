@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
-@AllArgsConstructor
 @Log
+@AllArgsConstructor
 public class ExcelDrawingService {
 
+    public static final int SHIFT_FOR_ROW_NAMINGS = 1;
+    private static final int SHIFT_FOR_COLUMN_NAMINGS = 1;
     private static final int ITERATIONS_COUNT = 12;
     private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
             "0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2"};
@@ -55,65 +57,71 @@ public class ExcelDrawingService {
     }
 
     @SneakyThrows
-    public void drawResults(double[] initialYValues, double[][] ynParts, List<List<Double>> statisticsMatrix, List<String> parametersNames) {
+    public void drawResults(double[] initialYValues, double[][] derivativeParameterValuesForTimeMoments) {
         try (XSSFWorkbook resultBook = new XSSFWorkbook()) {
             XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
-            Row firstRow = resultSheet.createRow(0);
-            int shiftForColumnNamings = 1;
-            int shiftForRowNamings = 1;
-            for (int k = 0; k <= ITERATIONS_COUNT; k++) {
-                Cell cell = firstRow.createCell(k + shiftForColumnNamings);
-                CellStyle cellStyle = resultBook.createCellStyle();
-                Font headerFont = resultBook.createFont();
-                headerFont.setBold(true);
-                cellStyle.setFont(headerFont);
-                cell.setCellStyle(cellStyle);
-                double timeStep = (double) k / ITERATIONS_COUNT;
-                cell.setCellValue("t = " + timeStep);
-            }
-
-            for (int i = 0; i < ynParts.length; i++) {
-                //i+1 j+1 because of place for naming
-                XSSFRow newRow = resultSheet.createRow(i + 1);
-                for (int j = 0; j < ITERATIONS_COUNT; j++) {
-                    XSSFCell cell = newRow.createCell(j + 1 + shiftForColumnNamings);
-                    cell.setCellValue(ynParts[i][j]);
-                }
-                XSSFCell cell = newRow.createCell(shiftForColumnNamings); //because of beginning
-                cell.setCellValue(initialYValues[i]);
-                cell = newRow.createCell(0); //because it's edge
-                cell.setCellValue(parametersNames.get(i));
-            }
-
-            for (int i = 0; i < ynParts.length; i++) {
-                XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
-                XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0,
-                        GRAPHS_FIRST_ROW + (GRAPH_LENGTH + 3) * i, 12, GRAPHS_FIRST_ROW + GRAPH_LENGTH + (GRAPH_LENGTH + 3) * i);
-                XSSFChart chart = drawing.createChart(anchor);
-                XDDFChartLegend legend = chart.getOrAddLegend();
-                legend.setPosition(LegendPosition.TOP_RIGHT);
-                XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-                bottomAxis.setTitle("Время");
-                XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
-                leftAxis.setTitle("Значение");
-                XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
-                data.setVaryColors(false);
-                XDDFCategoryDataSource timeArgument = XDDFDataSourcesFactory.fromArray(ITERATIONS_MOMENTS);
-                XDDFNumericalDataSource<Double> resultParameterValues = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
-                        new CellRangeAddress(i + shiftForRowNamings, i + shiftForRowNamings,
-                                shiftForColumnNamings, shiftForColumnNamings + ITERATIONS_COUNT));
-                XDDFNumericalDataSource<Double> realParameterValues = XDDFDataSourcesFactory.fromArray(statisticsMatrix.get(i).toArray(new Double[0]));
-                XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(timeArgument, resultParameterValues);
-                XDDFLineChartData.Series series2 = (XDDFLineChartData.Series) data.addSeries(timeArgument, realParameterValues);
-                series1.setTitle("Данные модели для " + parametersNames.get(i));
-                series1.setSmooth(true);
-                series1.setMarkerStyle(MarkerStyle.STAR);
-                series2.setTitle("Значение статистики для " + parametersNames.get(i));
-                chart.plot(data);
+            drawGraphsNumberView(initialYValues, derivativeParameterValuesForTimeMoments, resultBook, resultSheet);
+            for (int parameterNumber = 0; parameterNumber < derivativeParameterValuesForTimeMoments.length; parameterNumber++) {
+                drawParameterGraph(resultSheet, parameterNumber);
             }
             try (FileOutputStream fileOutputStream = new FileOutputStream("resultBook.xlsx")) {
                 resultBook.write(fileOutputStream);
             }
+        }
+    }
+
+    private void drawParameterGraph(XSSFSheet resultSheet, int parameterNumber) {
+        XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
+        XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0,
+                GRAPHS_FIRST_ROW + (GRAPH_LENGTH + 3) * parameterNumber, 12, GRAPHS_FIRST_ROW + GRAPH_LENGTH + (GRAPH_LENGTH + 3) * parameterNumber);
+        XSSFChart chart = drawing.createChart(anchor);
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.TOP_RIGHT);
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Время");
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Значение");
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        data.setVaryColors(false);
+        XDDFCategoryDataSource timeArgument = XDDFDataSourcesFactory.fromArray(ITERATIONS_MOMENTS);
+        XDDFNumericalDataSource<Double> resultParameterValues = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
+                new CellRangeAddress(parameterNumber + SHIFT_FOR_ROW_NAMINGS, parameterNumber + SHIFT_FOR_ROW_NAMINGS,
+                        SHIFT_FOR_COLUMN_NAMINGS, SHIFT_FOR_COLUMN_NAMINGS + ITERATIONS_COUNT));
+        XDDFNumericalDataSource<Double> realParameterValues = XDDFDataSourcesFactory.fromArray(this.statisticMatrix.get(parameterNumber).toArray(new Double[0]));
+        XDDFLineChartData.Series series1 = (XDDFLineChartData.Series) data.addSeries(timeArgument, resultParameterValues);
+        XDDFLineChartData.Series series2 = (XDDFLineChartData.Series) data.addSeries(timeArgument, realParameterValues);
+        series1.setTitle("Данные модели для " + this.parametersNames.get(parameterNumber));
+        series1.setSmooth(true);
+        series1.setMarkerStyle(MarkerStyle.STAR);
+        series2.setTitle("Значение статистики для " + this.parametersNames.get(parameterNumber));
+        chart.plot(data);
+    }
+
+    private void drawGraphsNumberView(double[] initialYValues, double[][] derivativeParameterValuesForTimeMoments,
+                                      XSSFWorkbook resultBook, XSSFSheet resultSheet) {
+        Row firstRow = resultSheet.createRow(0);
+        for (int k = 0; k <= ITERATIONS_COUNT; k++) {
+            Cell cell = firstRow.createCell(k + SHIFT_FOR_COLUMN_NAMINGS);
+            CellStyle cellStyle = resultBook.createCellStyle();
+            Font headerFont = resultBook.createFont();
+            headerFont.setBold(true);
+            cellStyle.setFont(headerFont);
+            cell.setCellStyle(cellStyle);
+            double timeStep = (double) k / ITERATIONS_COUNT;
+            cell.setCellValue("t = " + timeStep);
+        }
+
+        for (int i = 0; i < derivativeParameterValuesForTimeMoments.length; i++) {
+            //i+1 j+1 because of place for naming
+            XSSFRow newRow = resultSheet.createRow(i + 1);
+            for (int j = 0; j < ITERATIONS_COUNT; j++) {
+                XSSFCell cell = newRow.createCell(j + 1 + SHIFT_FOR_COLUMN_NAMINGS);
+                cell.setCellValue(derivativeParameterValuesForTimeMoments[i][j]);
+            }
+            XSSFCell cell = newRow.createCell(SHIFT_FOR_COLUMN_NAMINGS); //because of beginning
+            cell.setCellValue(initialYValues[i]);
+            cell = newRow.createCell(0); //because it's edge
+            cell.setCellValue(parametersNames.get(i));
         }
     }
 
