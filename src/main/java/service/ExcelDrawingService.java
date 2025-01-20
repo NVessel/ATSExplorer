@@ -32,6 +32,7 @@ public class ExcelDrawingService {
     private static final int GRAPHS_FIRST_ROW = 15;
     private static final int GRAPH_LENGTH = 29;
     private static final int GRAPH_WIDTH = 10;
+    private static final int ALTOGETHER_GRAPH_LENGTH = 35;
 
     private final List<List<Integer>> dependencyMatrix;
     private final List<List<Double>> statisticMatrix;
@@ -57,21 +58,23 @@ public class ExcelDrawingService {
     }
 
     @SneakyThrows
-    public void drawResults(double[] initialYValues, double[][] derivativeParameterValuesForTimeMoments) {
+    public void drawResults(double[] initialDerivativeParametersValues, double[][] derivativeParameterValuesForTimeMoments) {
         try (XSSFWorkbook resultBook = new XSSFWorkbook()) {
             XSSFSheet resultSheet = resultBook.createSheet("resultSheet");
-            drawGraphsNumberView(initialYValues, derivativeParameterValuesForTimeMoments, resultBook, resultSheet);
+            XSSFDrawing drawingPatriarch = resultSheet.createDrawingPatriarch();
+            drawGraphsNumberView(initialDerivativeParametersValues, derivativeParameterValuesForTimeMoments, resultBook, resultSheet);
             for (int parameterNumber = 0; parameterNumber < derivativeParameterValuesForTimeMoments.length; parameterNumber++) {
-                drawParameterGraph(resultSheet, parameterNumber);
+                drawParameterGraph(resultSheet, parameterNumber, drawingPatriarch);
             }
+            drawParametersAltogetherGraph(derivativeParameterValuesForTimeMoments,
+                    drawingPatriarch, resultSheet);
             try (FileOutputStream fileOutputStream = new FileOutputStream("resultBook.xlsx")) {
                 resultBook.write(fileOutputStream);
             }
         }
     }
 
-    private void drawParameterGraph(XSSFSheet resultSheet, int parameterNumber) {
-        XSSFDrawing drawing = resultSheet.createDrawingPatriarch();
+    private void drawParameterGraph(XSSFSheet resultSheet, int parameterNumber, XSSFDrawing drawing) {
         XSSFClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0,
                 GRAPHS_FIRST_ROW + (GRAPH_LENGTH + 3) * parameterNumber, 12, GRAPHS_FIRST_ROW + GRAPH_LENGTH + (GRAPH_LENGTH + 3) * parameterNumber);
         XSSFChart chart = drawing.createChart(anchor);
@@ -95,6 +98,32 @@ public class ExcelDrawingService {
         series1.setMarkerStyle(MarkerStyle.STAR);
         series2.setTitle("Значение статистики для " + this.parametersNames.get(parameterNumber));
         chart.plot(data);
+    }
+
+    private void drawParametersAltogetherGraph(double[][] derivativeParameterValuesForTimeMoments,
+                                               XSSFDrawing drawingPatriarch, XSSFSheet resultSheet) {
+        XSSFClientAnchor anchor = drawingPatriarch.createAnchor(0, 0, 0, 0, 15,
+                GRAPHS_FIRST_ROW, 27, GRAPHS_FIRST_ROW + ALTOGETHER_GRAPH_LENGTH);
+        XSSFChart chart = drawingPatriarch.createChart(anchor);
+        XDDFChartLegend legend = chart.getOrAddLegend();
+        legend.setPosition(LegendPosition.TOP_RIGHT);
+        XDDFCategoryAxis bottomAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Время");
+        XDDFValueAxis leftAxis = chart.createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Значение");
+        XDDFLineChartData data = (XDDFLineChartData) chart.createData(ChartTypes.LINE, bottomAxis, leftAxis);
+        data.setVaryColors(false);
+        XDDFCategoryDataSource timeArgument = XDDFDataSourcesFactory.fromArray(ITERATIONS_MOMENTS);
+        for (int parameterNumber = 0; parameterNumber < derivativeParameterValuesForTimeMoments.length; parameterNumber++) {
+            XDDFNumericalDataSource<Double> resultParameterValues = XDDFDataSourcesFactory.fromNumericCellRange(resultSheet,
+                    new CellRangeAddress(parameterNumber + SHIFT_FOR_ROW_NAMINGS, parameterNumber + SHIFT_FOR_ROW_NAMINGS,
+                            SHIFT_FOR_COLUMN_NAMINGS, SHIFT_FOR_COLUMN_NAMINGS + ITERATIONS_COUNT));
+            XDDFLineChartData.Series ongoingParameterSeries = (XDDFLineChartData.Series) data.addSeries(timeArgument, resultParameterValues);
+            ongoingParameterSeries.setTitle("Данные модели для " + this.parametersNames.get(parameterNumber));
+            ongoingParameterSeries.setSmooth(true);
+            ongoingParameterSeries.setMarkerStyle(MarkerStyle.STAR);
+            chart.plot(data);
+        }
     }
 
     private void drawGraphsNumberView(double[] initialYValues, double[][] derivativeParameterValuesForTimeMoments,
