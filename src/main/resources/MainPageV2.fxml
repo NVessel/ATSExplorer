@@ -216,11 +216,11 @@
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <TitledPane animated="false" layoutX="13.0" layoutY="13.0" prefHeight="527.0" prefWidth="1149.0" text="Уравнения">
+                              <TitledPane animated="false" layoutX="14.0" layoutY="12.0" prefHeight="526.0" prefWidth="706.0" text="Уравнения факторов">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <VBox fx:id="externalFactorsVBox" layoutY="-3.0" prefHeight="503.0" prefWidth="1146.0" />
+                                          <VBox fx:id="externalFactorsVBox" prefHeight="502.0" prefWidth="706.0" />
                                        </children>
                                     </AnchorPane>
                                 </content>

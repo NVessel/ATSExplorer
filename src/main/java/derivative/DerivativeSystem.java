@@ -42,7 +42,7 @@ public class DerivativeSystem implements DerivnFunction {
                 }
             }
             dxdt[derivativeParameterNumber] = setOneIfZero(positiveSideOfExternalFactorsSum) * positiveSideOfParameterMultiplication
-                    - negativeSideOfExternalFactorsSum * negativeSideOfParameterMultiplication;
+                    - setOneIfZero(negativeSideOfExternalFactorsSum) * negativeSideOfParameterMultiplication;
         }
         return dxdt;
     }

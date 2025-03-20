@@ -6,12 +6,14 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.java.Log;
+import model.PolynomialDependency;
 import service.CalculationService;
 import service.FilesDemonstrationService;
 import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.StatisticsSupplier;
 
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 
 @Log
@@ -37,7 +39,7 @@ public class MainPageController {
     @FXML
     private void calculateOnGivenDependencies() {
         if (areManualSettingsReady()) {
-            calculationService.calculateOnManualSettings();
+            calculationService.calculateOnManualSettings(this.parametersDependenciesMatrixSupplier, buildPolynomialDependencies(), buildInitialValues());
         } else {
             log.warning("Can not calculate manually because some boxes are empty");
         }
@@ -108,6 +110,14 @@ public class MainPageController {
         System.exit(0);
     }
 
+    private double[] buildInitialValues() {
+        return new double[0];
+    }
+
+    private List<PolynomialDependency> buildPolynomialDependencies() {
+        return null;
+    }
+
     private void redrawInitialConditions() {
         initialConditionsVBox.getChildren().clear();
         for (String parameterName : this.parametersDependenciesMatrixSupplier.getParametersNames()) {
@@ -116,9 +126,7 @@ public class MainPageController {
     }
 
     private boolean areManualSettingsReady() {
-        return !initialConditionsVBox.getChildren().isEmpty()
-                && !equationsVBox.getChildren().isEmpty()
-                && !equationsVBox.getChildren().isEmpty();
+        return !initialConditionsVBox.getChildren().isEmpty();
     }
 
     private void redrawExternalFactors() {

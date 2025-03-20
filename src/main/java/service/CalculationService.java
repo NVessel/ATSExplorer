@@ -2,7 +2,6 @@ package service;
 
 import derivative.DerivativeSystem;
 import flanagan.integration.RungeKutta;
-import lombok.Setter;
 import model.PolynomialDependency;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import suppliers.ParametersDependenciesMatrixSupplier;
@@ -12,7 +11,6 @@ import suppliers.StatisticsSupplier;
 import java.io.IOException;
 import java.util.List;
 
-@Setter
 public class CalculationService {
 
     private static final int ITERATIONS_COUNT = 12;
@@ -49,7 +47,8 @@ public class CalculationService {
         excelDrawingService.drawResults(extractInitialValues(statisticsMatrix, dependenciesMatrix.size()), derivativeParametersValuesForTimeMoments);
     }
 
-    public void calculateOnManualSettings() {
+    public void calculateOnManualSettings(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier,
+                                          List<PolynomialDependency> polynomialDependencies, double[] initialValues) {
 
     }
 
