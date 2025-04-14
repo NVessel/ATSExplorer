@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CalculationService {
 
-    private static final int ITERATIONS_COUNT = 12;
+    private static final int ITERATIONS_COUNT = 13;
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
 
     public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
@@ -34,8 +34,11 @@ public class CalculationService {
         double t0 = 0.0D;
         double t1 = 0.1D;
         double[][] derivativeParametersValuesForTimeMoments = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
+        for (int i = 0; i < dependenciesMatrix.size(); i++) {
+            derivativeParametersValuesForTimeMoments[i][0] = derivativeParametersValues[i];
+        }
         DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, polynomialDependencies);
-        for (int j = 0; j < ITERATIONS_COUNT; j++) {
+        for (int j = 1; j < ITERATIONS_COUNT; j++) {
             double[] derivativeParametersValuesInGivenTimeMoment = RungeKutta.fourthOrder(systemDerivative, t0, derivativeParametersValues, t1, h);
             for (int i = 0; i < dependenciesMatrix.size(); i++) {
                 derivativeParametersValuesForTimeMoments[i][j] = derivativeParametersValuesInGivenTimeMoment[i];
@@ -44,7 +47,7 @@ public class CalculationService {
             t0 += 0.1;
             t1 += 0.1;
         }
-        excelDrawingService.drawResults(extractInitialValues(statisticsMatrix, dependenciesMatrix.size()), derivativeParametersValuesForTimeMoments);
+        excelDrawingService.drawResults(derivativeParametersValuesForTimeMoments);
     }
 
     public void calculateOnManualSettings(ParametersDependenciesMatrixSupplier parametersDependenciesMatrixSupplier,
