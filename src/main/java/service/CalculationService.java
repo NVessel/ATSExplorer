@@ -17,7 +17,8 @@ public class CalculationService {
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
 
     public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
-                                      StatisticsSupplier statisticsSupplier) throws IOException, InvalidFormatException {
+                                      StatisticsSupplier statisticsSupplier,
+                                      List<Double> limitValues) throws IOException, InvalidFormatException {
         List<List<Integer>> dependenciesMatrix = dependenciesMatrixSupplier.getExternalMatrix();
         List<List<Double>> statisticsMatrix = statisticsSupplier.getExternalStatistics();
         List<String> parametersNames = dependenciesMatrixSupplier.getParametersNames();
@@ -25,7 +26,7 @@ public class CalculationService {
         List<PolynomialDependency> polynomialDependencies = new PolynomialDependenciesSupplier(dependenciesMatrix, statisticsMatrix)
                 .getPolynomialDependencies();
         ExcelDrawingService excelDrawingService = new ExcelDrawingService(dependenciesMatrix, statisticsMatrix,
-                parametersNames, polynomialDependencies);
+                parametersNames, polynomialDependencies, limitValues);
         excelDrawingService.drawPolynomials();
         writeSystemToFiles(polynomialDependencies);
 

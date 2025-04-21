@@ -3,6 +3,8 @@ package controller;
 import builder.ViewComponentsBuilder;
 import javafx.fxml.FXML;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import lombok.extern.java.Log;
@@ -13,6 +15,7 @@ import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.StatisticsSupplier;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -27,6 +30,8 @@ public class MainPageController {
     private VBox initialConditionsVBox;
     @FXML
     private VBox externalFactorsVBox;
+    @FXML
+    private VBox limitValuesVBox;
     @FXML
     private VBox equationsVBox;
 
@@ -48,11 +53,27 @@ public class MainPageController {
     @FXML
     private void calculateOnStatistics() {
         try {
-            calculationService.calculateOnStatistics(this.parametersDependenciesMatrixSupplier, this.statisticsSupplier);
+            calculationService.calculateOnStatistics(this.parametersDependenciesMatrixSupplier,
+                    this.statisticsSupplier,
+                    this.collectLimitValues());
             log.log(Level.INFO, "Calculation is completed!");
         } catch (Exception e) {
             log.log(Level.SEVERE, "Something was wrong in calculation", e);
         }
+    }
+
+    private List<Double> collectLimitValues() {
+        List<Double> limitValues = new ArrayList<>();
+        this.limitValuesVBox.getChildren().forEach(hbox -> {
+            if (hbox instanceof HBox) {
+                ((HBox) hbox).getChildren().forEach(child -> {
+                    if (child instanceof TextField) {
+                        limitValues.add(Double.valueOf(((TextField) child).getText()));
+                    }
+                });
+            }
+        });
+        return limitValues;
     }
 
     @FXML
@@ -63,6 +84,7 @@ public class MainPageController {
         this.parametersDependenciesMatrixSupplier = new ParametersDependenciesMatrixSupplier(matrixFile);
         this.redrawInitialConditions();
         this.redrawExternalFactors();
+        this.redrawLimitValues();
     }
 
     @FXML
@@ -122,6 +144,13 @@ public class MainPageController {
         initialConditionsVBox.getChildren().clear();
         for (String parameterName : this.parametersDependenciesMatrixSupplier.getParametersNames()) {
             initialConditionsVBox.getChildren().add(viewComponentsBuilder.buildInitialConditionHBox(parameterName));
+        }
+    }
+
+    private void redrawLimitValues() {
+        limitValuesVBox.getChildren().clear();
+        for (String parameterName : this.parametersDependenciesMatrixSupplier.getParametersNames()) {
+            limitValuesVBox.getChildren().add(viewComponentsBuilder.buildLimitValueHBox(parameterName));
         }
     }
 

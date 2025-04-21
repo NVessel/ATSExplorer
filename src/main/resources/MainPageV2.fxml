@@ -216,7 +216,7 @@
                   <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <TitledPane animated="false" layoutX="14.0" layoutY="12.0" prefHeight="526.0" prefWidth="706.0" text="Уравнения факторов">
+                              <TitledPane animated="false" layoutX="14.0" layoutY="12.0" prefHeight="544.0" prefWidth="706.0" text="Уравнения факторов">
                                 <content>
                                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
@@ -231,7 +231,18 @@
                 </Tab>
                   <Tab text="Предельные значения">
                     <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                           <children>
+                              <TitledPane animated="false" layoutX="14.0" layoutY="10.0" prefHeight="546.0" prefWidth="549.0" text="Желаемые значения">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <VBox fx:id="limitValuesVBox" prefHeight="520.0" prefWidth="549.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </TitledPane>
+                           </children></AnchorPane>
                     </content>
                   </Tab>
               </tabs>

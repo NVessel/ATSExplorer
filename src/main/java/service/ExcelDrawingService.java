@@ -44,6 +44,7 @@ public class ExcelDrawingService {
     private final List<List<Double>> statisticMatrix;
     private final List<String> parametersNames;
     private final List<PolynomialDependency> polynomialDependencies;
+    private final List<Double> limitValues;
 
     public void drawPolynomials() {
         XSSFWorkbook resultBook = new XSSFWorkbook();
@@ -117,9 +118,11 @@ public class ExcelDrawingService {
 
         XDDFCategoryDataSource namesArgument = XDDFDataSourcesFactory.fromArray(this.parametersNames.toArray(new String[0]));
         XDDFNumericalDataSource<Double> parameterValuesInFixedTime = XDDFDataSourcesFactory.fromArray(collectDerivativeParameterValuesForTimeMoment(derivativeParameterValuesForTimeMoments, momentNumber));
-        XDDFRadarChartData.Series series = (XDDFRadarChartData.Series) data.addSeries(namesArgument, parameterValuesInFixedTime);
-        series.setTitle("Актуальные значения");
-
+        XDDFNumericalDataSource<Double> limitValues = XDDFDataSourcesFactory.fromArray(this.limitValues.toArray(new Double[0]));
+        XDDFRadarChartData.Series parameterValuesSeries = (XDDFRadarChartData.Series) data.addSeries(namesArgument, parameterValuesInFixedTime);
+        XDDFRadarChartData.Series limitValuesSeries = (XDDFRadarChartData.Series) data.addSeries(namesArgument, limitValues);
+        parameterValuesSeries.setTitle("Актуальные значения");
+        limitValuesSeries.setTitle("Желаемые значения");
         chart.plot(data);
     }
 
