@@ -1,8 +1,8 @@
 package service;
 
-import derivative.DerivativeSystem;
-import flanagan.integration.RungeKutta;
+import derivative.ApacheMathDerivativeSystem;
 import model.PolynomialDependency;
+import org.apache.commons.math3.ode.nonstiff.ClassicalRungeKuttaIntegrator;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import suppliers.ParametersDependenciesMatrixSupplier;
 import suppliers.PolynomialDependenciesSupplier;
@@ -31,22 +31,23 @@ public class CalculationService {
         writeSystemToFiles(polynomialDependencies);
 
         double[] derivativeParametersValues = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
-        double h = 0.01;
-        double t0 = 0.0D;
-        double t1 = 0.1D;
+        double h = 0.1;
+        double t0 = 0;
+        double t1 = t0 + h;
         double[][] derivativeParametersValuesForTimeMoments = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
         for (int i = 0; i < dependenciesMatrix.size(); i++) {
             derivativeParametersValuesForTimeMoments[i][0] = derivativeParametersValues[i];
         }
-        DerivativeSystem systemDerivative = new DerivativeSystem(dependenciesMatrix, polynomialDependencies);
+        ClassicalRungeKuttaIntegrator classicalRungeKuttaIntegrator = new ClassicalRungeKuttaIntegrator(h);
+        ApacheMathDerivativeSystem apacheMathDerivativeSystem = new ApacheMathDerivativeSystem(dependenciesMatrix, polynomialDependencies);
         for (int j = 1; j < ITERATIONS_COUNT; j++) {
-            double[] derivativeParametersValuesInGivenTimeMoment = RungeKutta.fourthOrder(systemDerivative, t0, derivativeParametersValues, t1, h);
+            double[] derivativeParametersValuesInGivenTimeMoment = classicalRungeKuttaIntegrator.singleStep(apacheMathDerivativeSystem, t0, derivativeParametersValues, t1);
             for (int i = 0; i < dependenciesMatrix.size(); i++) {
                 derivativeParametersValuesForTimeMoments[i][j] = derivativeParametersValuesInGivenTimeMoment[i];
             }
             derivativeParametersValues = derivativeParametersValuesInGivenTimeMoment;
-            t0 += 0.1;
-            t1 += 0.1;
+            t0 += h;
+            t1 += h;
         }
         excelDrawingService.drawResults(derivativeParametersValuesForTimeMoments);
     }
