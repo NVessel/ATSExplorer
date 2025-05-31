@@ -14,7 +14,7 @@ import java.util.List;
 public class CalculationService {
 
     private static final int ITERATIONS_COUNT = 13;
-    private static final double MAX_ERROR_PERCENT_LIMIT = 0.1;
+    private static final double MAX_ERROR_PERCENT_LIMIT = 0.15;
 
     public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
                                       StatisticsSupplier statisticsSupplier,
@@ -30,10 +30,10 @@ public class CalculationService {
         excelDrawingService.drawPolynomials();
         writeSystemToFiles(polynomialDependencies);
 
-        double[] derivativeParametersValues = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
         double h = 0.1;
         double t0 = 0;
         double t1 = t0 + h;
+        double[] derivativeParametersValues = extractInitialValues(statisticsMatrix, dependenciesMatrix.size());
         double[][] derivativeParametersValuesForTimeMoments = new double[dependenciesMatrix.size()][ITERATIONS_COUNT];
         for (int i = 0; i < dependenciesMatrix.size(); i++) {
             derivativeParametersValuesForTimeMoments[i][0] = derivativeParametersValues[i];
@@ -59,6 +59,7 @@ public class CalculationService {
 
     private void writeSystemToFiles(List<PolynomialDependency> polynomialDependencies) {
         DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter();
+        differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
         differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
         differentialSystemWriter.makePdfFromLatexFile();
     }

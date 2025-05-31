@@ -18,25 +18,34 @@ import java.util.stream.Collectors;
 public class DifferentialSystemWriter {
 
     private static final String TEX_FILENAME = "equationSystem.tex";
+    private static final String LATEX_NEW_LINE = "\\\\";
 
     @SneakyThrows
     public void writeSystemToLatex(List<PolynomialDependency> polynomialDependencies) {
         File latexFile = new File(TEX_FILENAME);
         try (FileWriter fileWriter = new FileWriter(latexFile)) {
-            fileWriter.write("\\documentclass[12pt, letterpaper]{article}\n");
-            fileWriter.write("\\usepackage{amsmath}\n");
+            fileWriter.write("\\documentclass[10pt, letterpaper]{article}\n");
+            fileWriter.write("\\usepackage[fleqn]{amsmath}     % Выравнивание формул по левому краю\n");
+            fileWriter.write("\\setlength{\\mathindent}{0pt}");
             fileWriter.write("\\usepackage[utf8]{inputenc}\n");
+            fileWriter.write("\\usepackage{geometry}\n" +
+                    "\\geometry{\n" +
+                    "  a4paper,\n" +
+                    "  left=3mm,\n" +
+                    "  top=15mm}\n");
             fileWriter.write("\n");
             fileWriter.write("\\begin{document}\n");
-            fileWriter.write("\\begin{equation*}\n");
-            fileWriter.write("\\begin{cases}\n");
+
             Map<Integer, List<PolynomialDependency>> derivativeParameterNumberToDependencies = buildDerivativeParameterNumberToItsDependencies(polynomialDependencies);
             for (Map.Entry<Integer, List<PolynomialDependency>> numberToDependencies : derivativeParameterNumberToDependencies.entrySet()) {
+                fileWriter.write("\\begin{equation*}\n");
+                fileWriter.write("\\begin{aligned}\n");
                 fileWriter.write(buildParameterRow(numberToDependencies.getKey(), numberToDependencies.getValue()));
-                fileWriter.write("\\\\");
+                fileWriter.write(LATEX_NEW_LINE);
+                fileWriter.write("\n");
+                fileWriter.write("\\end{aligned}\n");
+                fileWriter.write("\\end{equation*}\n");
             }
-            fileWriter.write("\\end{cases}\n");
-            fileWriter.write("\\end{equation*}\n");
             fileWriter.write("\\end{document}");
         }
     }
@@ -71,11 +80,10 @@ public class DifferentialSystemWriter {
         StringBuilder parameterRow = new StringBuilder();
         parameterRow.append("\\frac{dX_{")
                 .append(derivativeParameterNumber + 1)
-                .append("}(t)}{dt} = (");
+                .append("}(t)}{dt} &= (");
         parameterRow = buildSideOfParameterRow(polynomialDependencies, parameterRow, true);
-        parameterRow.append("\\\\");
-        parameterRow.append("\\quad");
-        parameterRow.append(" - (");
+        parameterRow.append(LATEX_NEW_LINE);
+        parameterRow.append("&- \\; (");
         parameterRow = buildSideOfParameterRow(polynomialDependencies, parameterRow, false);
         return parameterRow.toString();
     }
@@ -116,6 +124,6 @@ public class DifferentialSystemWriter {
 
     private String buildPolynomialAsString(double[] coefficients, int parameterNumber) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
-        return polynomialFunction.toString().replace("x", "X_" + (parameterNumber + 1));
+        return polynomialFunction.toString().replace("x", "X_{" + (parameterNumber + 1) + "}(t)");
     }
 }

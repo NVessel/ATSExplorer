@@ -34,7 +34,7 @@ public class StatisticsSupplier {
                     XSSFFormulaEvaluator formulaEvaluator = matrixWorkbook.getCreationHelper().createFormulaEvaluator();
                     CellValue evaluated = formulaEvaluator.evaluate(cell);
                     double roundValue = BigDecimal.valueOf(evaluated.getNumberValue())
-                            .setScale(2, RoundingMode.HALF_UP)
+                            .setScale(3, RoundingMode.HALF_UP)
                             .doubleValue();
                     rowCells.add(roundValue);
                 }

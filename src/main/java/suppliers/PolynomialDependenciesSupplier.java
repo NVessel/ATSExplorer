@@ -14,8 +14,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class PolynomialDependenciesSupplier {
 
-    private static final int PARAMETERS_REGRESSION_DEGREE = 1;
-    private static final int EXTERNAL_FACTOR_REGRESSION_DEGREE = 1;
+    private static final int PARAMETERS_REGRESSION_DEGREE = 2;
+    private static final int EXTERNAL_FACTOR_REGRESSION_DEGREE = 2;
 
     private final List<List<Integer>> dependencyMatrix;
     private final List<List<Double>> statisticMatrix;
@@ -73,6 +73,7 @@ public class PolynomialDependenciesSupplier {
         for (int k = 0; k < statisticMatrix.get(0).size(); k++) {
             sampleY[k] = statisticMatrix.get(derivativeParameterNumber).get(k);
             sampleX[k][0] = statisticMatrix.get(affectingParameterNumber).get(k);
+            sampleX[k][1] = sampleX[k][0] * sampleX[k][0];
             regression.newSampleData(sampleY, sampleX);
         }
         return regression;
@@ -85,6 +86,7 @@ public class PolynomialDependenciesSupplier {
         for (int k = 0; k < statisticMatrix.get(0).size(); k++) {
             sampleY[k] = statisticMatrix.get(externalFactorNumber).get(k);
             sampleX[k][0] = (double) k/statisticMatrix.get(0).size();
+            sampleX[k][1] = sampleX[k][0] * sampleX[k][0];
             regression.newSampleData(sampleY, sampleX);
         }
         return regression;

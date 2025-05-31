@@ -7,7 +7,7 @@ public class PolynomialUtils {
 
     public static double truncatePolynomialCoefficientDigits(double coefficient) {
         return BigDecimal.valueOf(coefficient)
-                .setScale(2, RoundingMode.HALF_UP)
+                .setScale(3, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
