@@ -15,6 +15,8 @@ public class CalculationService {
 
     private static final int ITERATIONS_COUNT = 13;
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.15;
+    private static final String SYMBOLIC_TEX_FILENAME = "symbolicSystem.tex";
+    private static final String TEX_FILENAME = "equationSystem.tex";
 
     public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
                                       StatisticsSupplier statisticsSupplier,
@@ -28,7 +30,7 @@ public class CalculationService {
         ExcelDrawingService excelDrawingService = new ExcelDrawingService(dependenciesMatrix, statisticsMatrix,
                 parametersNames, polynomialDependencies, limitValues);
         excelDrawingService.drawPolynomials();
-        writeSystemToFiles(polynomialDependencies);
+        writeSystemToFiles(polynomialDependencies, dependenciesMatrix.size());
 
         double h = 0.1;
         double t0 = 0;
@@ -57,11 +59,12 @@ public class CalculationService {
 
     }
 
-    private void writeSystemToFiles(List<PolynomialDependency> polynomialDependencies) {
-        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter();
-        differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
-        differentialSystemWriter.writeSystemToLatex(polynomialDependencies);
-        differentialSystemWriter.makePdfFromLatexFile();
+    private void writeSystemToFiles(List<PolynomialDependency> polynomialDependencies, int parametersQuantity) {
+        DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(1);
+        differentialSystemWriter.writeSystemInNumericViewToLatex(polynomialDependencies, TEX_FILENAME);
+        differentialSystemWriter.writeSystemInSymbolicWayToLatex(polynomialDependencies, SYMBOLIC_TEX_FILENAME, parametersQuantity);
+        differentialSystemWriter.makePdfFromLatexFile(TEX_FILENAME);
+        differentialSystemWriter.makePdfFromLatexFile(SYMBOLIC_TEX_FILENAME);
     }
 
     private double[] correctEvaluations(double[] yn, int timeCount, List<List<Double>> statisticsMatrix) {
