@@ -13,10 +13,11 @@ import java.util.List;
 
 public class CalculationService {
 
-    private static final int ITERATIONS_COUNT = 13;
+    private static final int ITERATIONS_COUNT = 10;
     private static final double MAX_ERROR_PERCENT_LIMIT = 0.15;
     private static final String SYMBOLIC_TEX_FILENAME = "symbolicSystem.tex";
     private static final String TEX_FILENAME = "equationSystem.tex";
+    private static final String POLYNOMIALS_APART_TEX_FILENAME = "polynomialsApart.tex";
 
     public void calculateOnStatistics(ParametersDependenciesMatrixSupplier dependenciesMatrixSupplier,
                                       StatisticsSupplier statisticsSupplier,
@@ -63,8 +64,11 @@ public class CalculationService {
         DifferentialSystemWriter differentialSystemWriter = new DifferentialSystemWriter(1);
         differentialSystemWriter.writeSystemInNumericViewToLatex(polynomialDependencies, TEX_FILENAME);
         differentialSystemWriter.writeSystemInSymbolicWayToLatex(polynomialDependencies, SYMBOLIC_TEX_FILENAME, parametersQuantity);
+        differentialSystemWriter.setPolynomialCounterInFiles(1);
+        differentialSystemWriter.writePolynomialDependenciesPartiallyToLatex(polynomialDependencies, POLYNOMIALS_APART_TEX_FILENAME, parametersQuantity);
         differentialSystemWriter.makePdfFromLatexFile(TEX_FILENAME);
         differentialSystemWriter.makePdfFromLatexFile(SYMBOLIC_TEX_FILENAME);
+        differentialSystemWriter.makePdfFromLatexFile(POLYNOMIALS_APART_TEX_FILENAME);
     }
 
     private double[] correctEvaluations(double[] yn, int timeCount, List<List<Double>> statisticsMatrix) {

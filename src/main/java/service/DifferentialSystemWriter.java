@@ -1,6 +1,7 @@
 package service;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import model.PolynomialDependency;
@@ -17,10 +18,11 @@ import java.util.stream.Collectors;
 
 @Log
 @AllArgsConstructor
-//TODO Refactor
+@Setter
+//TODO Refactor, remove duplicate methods
 public class DifferentialSystemWriter {
 
-    private int symbolicViewPolynomialCounter;
+    private int polynomialCounterInFiles;
 
     private static final String LATEX_NEW_LINE = "\\\\";
 
@@ -37,7 +39,6 @@ public class DifferentialSystemWriter {
                 fileWriter.write(buildParameterRow(numberToDependencies.getKey(),
                         buildSideOfParameterRowInNumericWay(numberToDependencies.getValue(), true),
                         buildSideOfParameterRowInNumericWay(numberToDependencies.getValue(), false)));
-                fileWriter.write(LATEX_NEW_LINE);
                 fileWriter.write("\n");
                 fileWriter.write("\\end{aligned}\n");
                 fileWriter.write("\\end{equation*}\n");
@@ -60,9 +61,25 @@ public class DifferentialSystemWriter {
                 fileWriter.write(buildParameterRow(numberToDependencies.getKey(),
                         buildSideOfParameterRowInSymbolicWay(numberToDependencies.getValue(), parametersQuantity, true),
                         buildSideOfParameterRowInSymbolicWay(numberToDependencies.getValue(), parametersQuantity, false)));
-                fileWriter.write(LATEX_NEW_LINE);
                 fileWriter.write("\n");
                 fileWriter.write("\\end{aligned}\n");
+                fileWriter.write("\\end{equation*}\n");
+            }
+            fileWriter.write("\\end{document}");
+        }
+    }
+
+    @SneakyThrows
+    public void writePolynomialDependenciesPartiallyToLatex(List<PolynomialDependency> polynomialDependencies,
+                                                            String texFilename,
+                                                            int parametersQuantity) {
+        File latexFile = new File(texFilename);
+        try (FileWriter fileWriter = new FileWriter(latexFile)) {
+            writeBeginning(fileWriter);
+            for (PolynomialDependency polynomialDependency : polynomialDependencies) {
+                fileWriter.write("\\begin{equation*}\n");
+                fileWriter.write(buildPolynomialDependencyRowApart(polynomialDependency, parametersQuantity));
+                fileWriter.write("\n");
                 fileWriter.write("\\end{equation*}\n");
             }
             fileWriter.write("\\end{document}");
@@ -190,10 +207,28 @@ public class DifferentialSystemWriter {
     }
 
     private String buildPolynomialForParameterRowInSymbolicWay(int affectingParameterNumber) {
-        return "f_{" + this.symbolicViewPolynomialCounter++
+        return "f_{" + this.polynomialCounterInFiles++
                 + "}("
                 + "X_{" + (affectingParameterNumber + 1)
                 + "}(t))";
+    }
+
+    private String buildPolynomialDependencyRowApart(PolynomialDependency polynomialDependency,
+                                                     int parametersQuantity) {
+        StringBuilder row = new StringBuilder();
+        if (polynomialDependency.getRegressionMetrics().isEmpty()) {
+            row.append("F_{")
+                    .append(polynomialDependency.getDerivativeParameterNumberToAffectingParameterNumber().getValue() - parametersQuantity + 1)
+                    .append("}(t) = ");
+            PolynomialFunction polynomialFunction = new PolynomialFunction(polynomialDependency.getPolynomialCoefficients());
+            String externalFactorExpression = polynomialFunction.toString().replace("x", "t");
+            row.append(externalFactorExpression);
+        } else  {
+            row.append(buildPolynomialForParameterRowInSymbolicWay(polynomialDependency.getDerivativeParameterNumberToAffectingParameterNumber().getValue()))
+                    .append(" = ")
+                    .append(buildPolynomialForParameterRowInNumericWay(polynomialDependency.getPolynomialCoefficients(), polynomialDependency.getDerivativeParameterNumberToAffectingParameterNumber().getValue()));
+        }
+        return row.toString();
     }
 
     private String buildExternalFactorForParameterRowInNumericWay(double[] polynomialCoefficients, int elementCounter) {
@@ -206,7 +241,14 @@ public class DifferentialSystemWriter {
 
     private String buildPolynomialForParameterRowInNumericWay(double[] coefficients, int parameterNumber) {
         PolynomialFunction polynomialFunction = new PolynomialFunction(coefficients);
-        return polynomialFunction.toString().replace("x", "X_{" + (parameterNumber + 1) + "}(t)");
+        String polynomialFunctionAsString = polynomialFunction.toString();
+        polynomialFunctionAsString = polynomialFunctionAsString.replaceFirst("x", "X_{" + (parameterNumber + 1) + "}(t)");
+        int degree = 2;
+        while (polynomialFunctionAsString.contains("x^" + degree)) {
+            polynomialFunctionAsString = polynomialFunctionAsString.replace("x^" + degree, "X_{" + (parameterNumber + 1) + "}^" + degree + "(t)");
+            degree++;
+        }
+        return polynomialFunctionAsString;
     }
 
 }

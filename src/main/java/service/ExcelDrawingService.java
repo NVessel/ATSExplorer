@@ -28,10 +28,10 @@ public class ExcelDrawingService {
     public static final int SHIFT_FOR_ROW_NAMINGS = 1;
     private static final int SHIFT_FOR_COLUMN_NAMINGS = 1;
     //FIXME leave one constant, remove in other services
-    private static final int ITERATIONS_COUNT = 13;
+    private static final int ITERATIONS_COUNT = 10;
     //FIXME remove time moments
     private static final String[] ITERATIONS_MOMENTS = new String[]{"0", "0.1", "0.2", "0.3", "0.4",
-            "0.5", "0.6", "0.7", "0.8", "0.9", "1", "1.1", "1.2"};
+            "0.5", "0.6", "0.7", "0.8", "0.9"};
     private static final int LINEAR_GRAPHS_FIRST_ROW = 15;
     private static final int LINEAR_GRAPH_LENGTH = 29;
     private static final int GRAPH_WIDTH = 10;
